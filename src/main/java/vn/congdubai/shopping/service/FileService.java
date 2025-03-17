@@ -69,7 +69,6 @@ public class FileService {
             throws URISyntaxException, FileNotFoundException {
         URI uri = new URI(baseURI + folder + "/" + fileName);
         Path path = Paths.get(uri);
-
         File file = new File(path.toString());
         return new InputStreamResource(new FileInputStream(file));
     }

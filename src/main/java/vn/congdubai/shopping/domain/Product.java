@@ -59,7 +59,7 @@ public class Product {
 
     // Liên kết với Category (Danh mục sản phẩm)
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "product")
