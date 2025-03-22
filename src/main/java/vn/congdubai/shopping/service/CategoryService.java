@@ -1,13 +1,13 @@
 package vn.congdubai.shopping.service;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import vn.congdubai.shopping.domain.Category;
-import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.CategoryRepository;
 
@@ -19,9 +19,14 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    public Specification<Category> notDeletedSpec() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false);
+    }
+
     // Fetch all category
     public ResultPaginationDTO handleFetchCategories(Specification<Category> spec, Pageable pageable) {
-        Page<Category> pCategory = this.categoryRepository.findAll(spec, pageable);
+        Specification<Category> notDeletedSpec = notDeletedSpec().and(spec);
+        Page<Category> pCategory = this.categoryRepository.findAll(notDeletedSpec, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
@@ -38,8 +43,37 @@ public class CategoryService {
 
     // Fetch category by id
     public Category handleFetchCategoryById(long id) {
-        return this.categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + id));
+        Optional<Category> categoryOptional = this.categoryRepository.findById(id);
+        if (categoryOptional.isPresent())
+            return categoryOptional.get();
+        return null;
+    }
+
+    // Check exist By Name
+    public boolean existByName(String name) {
+        return this.categoryRepository.existsByName(name);
+    }
+
+    // Create new category
+    public Category handleCreateCategory(Category category) {
+        return this.categoryRepository.save(category);
+    }
+
+    // Update category
+    public Category handleUpdateCategory(Category category) {
+        Category currentCategory = this.handleFetchCategoryById(category.getId());
+        if (currentCategory != null) {
+            currentCategory.setName(category.getName());
+            currentCategory.setDescription(category.getDescription());
+            currentCategory.setImage(category.getImage());
+            this.categoryRepository.save(currentCategory);
+        }
+        return currentCategory;
+    }
+
+    // Delete category
+    public void handleDeleteCategory(long id) {
+        this.categoryRepository.softDeleteCategory(id);
     }
 
 }

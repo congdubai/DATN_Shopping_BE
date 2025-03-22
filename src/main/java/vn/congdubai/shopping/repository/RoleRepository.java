@@ -18,6 +18,6 @@ public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificat
 
     @Modifying
     @Transactional
-    @Query("UPDATE Role r SET r.isDeleted = true WHERE p.id = :id")
+    @Query("UPDATE Role r SET r.isDeleted = true WHERE r.id = :id")
     void softDeleteRole(@Param("id") Long id);
 }

@@ -78,7 +78,7 @@ public class UserService {
     // create new user
     public User createUser(User user) {
         if (user.getRole() != null) {
-            Role role = this.roleService.handleFetchById(user.getRole().getId());
+            Role role = this.roleService.handleFetchRoleById(user.getRole().getId());
             user.setRole(role != null ? role : null);
         }
         return this.userRepository.save(user);
@@ -129,7 +129,7 @@ public class UserService {
             userCurrent.setAge(user.getAge());
             userCurrent.setName(user.getName());
             if (user.getRole() != null) {
-                Role r = this.roleService.handleFetchById(user.getRole().getId());
+                Role r = this.roleService.handleFetchRoleById(user.getRole().getId());
                 userCurrent.setRole(r != null ? r : null);
             }
             this.userRepository.save(userCurrent);

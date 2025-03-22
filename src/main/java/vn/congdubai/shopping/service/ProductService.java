@@ -7,11 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
-import vn.congdubai.shopping.repository.CategoryRepository;
 import vn.congdubai.shopping.repository.ProductRepository;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
