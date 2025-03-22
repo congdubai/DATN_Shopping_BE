@@ -40,7 +40,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
     private String address;
-    private boolean active = false;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
@@ -56,7 +59,7 @@ public class User {
     private Role role;
 
     @PrePersist
-    public void handleBeforCreate() {
+    public void handleBeforeeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
@@ -64,7 +67,7 @@ public class User {
     }
 
     @PreUpdate
-    public void handleBeforUpdate() {
+    public void handleBeforeUpdate() {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";

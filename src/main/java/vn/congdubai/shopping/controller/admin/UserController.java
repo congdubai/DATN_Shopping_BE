@@ -64,7 +64,7 @@ public class UserController {
             throws IdInvalidException {
         User user = this.userService.fetchUserById(id);
         if (user == null) {
-            throw new IdInvalidException("Id " + id + " Không tồn tại.");
+            throw new IdInvalidException("người dùng với Id " + id + " Không tồn tại.");
         }
         this.userService.deleteUser(id);
         return ResponseEntity.ok(null);
@@ -72,7 +72,7 @@ public class UserController {
 
     @PutMapping("/users")
     @ApiMessage("Update user success")
-    public ResponseEntity<ResUpdateUserDTO> handleUpdateUser(@Valid @RequestBody User putUser)
+    public ResponseEntity<ResUpdateUserDTO> handleUpdateUser(@RequestBody User putUser)
             throws IdInvalidException {
         User user = this.userService.UpdateUser(putUser);
         if (user == null) {

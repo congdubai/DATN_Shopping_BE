@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import vn.congdubai.shopping.domain.Role;
 import vn.congdubai.shopping.domain.User;
 import vn.congdubai.shopping.domain.response.ResCreateUserDTO;
@@ -27,18 +28,24 @@ public class UserService {
         this.roleService = roleService;
     }
 
+    public Specification<User> notDeletedSpec() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false);
+    }
+
     // fetch all user
     public ResultPaginationDTO getAllUser(Specification<User> spec, Pageable pageable) {
-        Page<User> userPage = this.userRepository.findAll(spec, pageable);
+        Specification<User> notDeletedSpec = notDeletedSpec().and(spec);
+        Page<User> pUser = this.userRepository.findAll(notDeletedSpec, pageable);
+
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
         mt.setPage(pageable.getPageNumber() + 1);
         mt.setPageSize(pageable.getPageSize());
-        mt.setPages(userPage.getTotalPages());
-        mt.setTotal(userPage.getTotalElements());
+        mt.setPages(pUser.getTotalPages());
+        mt.setTotal(pUser.getTotalElements());
         rs.setMeta(mt);
 
-        List<ResUserDTO> listUser = userPage.getContent()
+        List<ResUserDTO> listUser = pUser.getContent()
                 .stream().map(item -> this.convertToResUserDTO(item))
                 .collect(Collectors.toList());
         rs.setResult(listUser);
@@ -51,6 +58,7 @@ public class UserService {
         ResUserDTO.RoleUser role = new ResUserDTO.RoleUser();
 
         res.setId(user.getId());
+        res.setAvatar(user.getAvatar());
         res.setEmail(user.getEmail());
         res.setName(user.getName());
         res.setAge(user.getAge());
@@ -70,7 +78,7 @@ public class UserService {
     // create new user
     public User createUser(User user) {
         if (user.getRole() != null) {
-            Role role = this.roleService.fetchById(user.getRole().getId());
+            Role role = this.roleService.handleFetchById(user.getRole().getId());
             user.setRole(role != null ? role : null);
         }
         return this.userRepository.save(user);
@@ -82,6 +90,7 @@ public class UserService {
 
         res.setId(user.getId());
         res.setName(user.getName());
+        res.setAvatar(user.getAvatar());
         res.setEmail(user.getEmail());
         res.setAge(user.getAge());
         res.setCreatedAt(user.getCreatedAt());
@@ -114,11 +123,13 @@ public class UserService {
     public User UpdateUser(User user) {
         User userCurrent = this.fetchUserById(user.getId());
         if (userCurrent != null) {
+            userCurrent.setAddress(user.getAddress());
+            userCurrent.setGender(user.getGender());
+            userCurrent.setAvatar(user.getAvatar());
+            userCurrent.setAge(user.getAge());
             userCurrent.setName(user.getName());
-            userCurrent.setEmail(user.getEmail());
-            userCurrent.setPassword(user.getPassword());
             if (user.getRole() != null) {
-                Role r = this.roleService.fetchById(user.getRole().getId());
+                Role r = this.roleService.handleFetchById(user.getRole().getId());
                 userCurrent.setRole(r != null ? r : null);
             }
             this.userRepository.save(userCurrent);
@@ -132,6 +143,7 @@ public class UserService {
         res.setId(user.getId());
         res.setName(user.getName());
         res.setAge(user.getAge());
+        res.setAvatar(user.getAvatar());
         res.setUpdatedAt(user.getUpdatedAt());
         res.setGender(user.getGender());
         res.setAddress(user.getAddress());

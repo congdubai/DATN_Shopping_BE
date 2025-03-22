@@ -29,14 +29,14 @@ public class RoleController {
     public ResponseEntity<ResultPaginationDTO> getRoles(
             @Filter Specification<Role> spec, Pageable pageable) {
 
-        return ResponseEntity.ok(this.roleService.getRoles(spec, pageable));
+        return ResponseEntity.ok(this.roleService.handleFetchRoles(spec, pageable));
     }
 
     @GetMapping("/roles/{id}")
     @ApiMessage("Fetch role by id")
     public ResponseEntity<Role> getById(@PathVariable("id") long id) throws IdInvalidException {
 
-        Role role = this.roleService.fetchById(id);
+        Role role = this.roleService.handleFetchById(id);
         if (role == null) {
             throw new IdInvalidException("Resume với id = " + id + " không tồn tại");
         }

@@ -12,6 +12,7 @@ public class ResCreateUserDTO {
     private long id;
     private String name;
     private String email;
+    private String avatar;
     private GenderEnum gender;
     private String address;
     private int age;

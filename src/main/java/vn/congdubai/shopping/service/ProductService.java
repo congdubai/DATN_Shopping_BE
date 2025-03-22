@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
@@ -18,17 +19,23 @@ import vn.congdubai.shopping.util.error.IdInvalidException;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
     public ProductService(ProductRepository productRepository, FileService fileService,
-            CategoryRepository categoryRepository) {
+            CategoryService categoryService) {
         this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
+    }
+
+    public Specification<Product> notDeletedSpec() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false);
     }
 
     // Fetch all products
     public ResultPaginationDTO handleFetchProducts(Specification<Product> spec, Pageable pageable) {
-        Page<Product> pProducts = this.productRepository.findAll(spec, pageable);
+        Specification<Product> notDeletedSpec = notDeletedSpec().and(spec); // Kết hợp với spec của người dùng
+        Page<Product> pProducts = this.productRepository.findAll(notDeletedSpec, pageable);
+
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
@@ -42,13 +49,47 @@ public class ProductService {
         return rs;
     }
 
+    // Fetch Product by id
+    public Product handleFetchProductById(long id) {
+        Optional<Product> productOptional = this.productRepository.findById(id);
+        if (productOptional.isPresent()) {
+            return productOptional.get();
+        }
+        return null;
+    }
+
+    // Check exist by name
+    public boolean existByName(String name) {
+        return this.productRepository.existsByName(name);
+    }
+
     // Create new product
     public Product handleCreateProduct(Product product) throws IdInvalidException {
-        Category category = categoryRepository.findById(product.getCategory().getId())
-                .orElseThrow(() -> new IdInvalidException("Danh mục chưa tồn tại hoặc chưa nhập."));
+        Category category = categoryService.handleFetchCategoryById(product.getCategory().getId());
         product.setCategory(category);
-
         return productRepository.save(product);
     }
 
+    // Update product
+    public Product handleUpdateProduct(Product product) throws IdInvalidException {
+        Product currentProduct = this.handleFetchProductById(product.getId());
+        if (currentProduct != null) {
+            currentProduct.setName(product.getName());
+            currentProduct.setPrice(product.getPrice());
+            currentProduct.setImage(product.getImage());
+            currentProduct.setShortDesc(product.getShortDesc());
+            currentProduct.setDetailDesc(product.getDetailDesc());
+            if (product.getCategory() != null) {
+                Category category = this.categoryService.handleFetchCategoryById(product.getCategory().getId());
+                currentProduct.setCategory(category != null ? category : null);
+            }
+            this.productRepository.save(currentProduct);
+        }
+        return currentProduct;
+    }
+
+    // delete a product
+    public void handleDeleteProduct(long id) {
+        this.productRepository.softDeleteProduct(id);
+    }
 }

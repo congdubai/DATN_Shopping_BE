@@ -19,14 +19,16 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-    public Role fetchById(long id) {
+    // Fetch role by id
+    public Role handleFetchById(long id) {
         Optional<Role> roleOptional = this.roleRepository.findById(id);
         if (roleOptional.isPresent())
             return roleOptional.get();
         return null;
     }
 
-    public ResultPaginationDTO getRoles(Specification<Role> spec, Pageable pageable) {
+    // Fetch all role
+    public ResultPaginationDTO handleFetchRoles(Specification<Role> spec, Pageable pageable) {
         Page<Role> pRole = this.roleRepository.findAll(spec, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
@@ -40,5 +42,31 @@ public class RoleService {
         rs.setMeta(mt);
         rs.setResult(pRole.getContent());
         return rs;
+    }
+
+    // Check exist By Name
+    public boolean existByName(String name) {
+        return this.roleRepository.existsByName(name);
+    }
+
+    // Create new role
+    public Role handleCreateRole(Role role) {
+        return this.roleRepository.save(role);
+    }
+
+    // Update role
+    public Role handleUpdateRole(Role role) {
+        Role currentRole = this.handleFetchById(role.getId());
+        if (currentRole != null) {
+            currentRole.setName(role.getName());
+            currentRole.setDescription(role.getDescription());
+        }
+        return currentRole;
+    }
+
+    // Delete role
+    // delete a product
+    public void handleDeleteProduct(long id) {
+        this.roleRepository.softDeleteRole(id);
     }
 }

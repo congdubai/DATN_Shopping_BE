@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "product_details")
+@Table(name = "tblproduct_detail")
 public class ProductDetail {
 
     @Id

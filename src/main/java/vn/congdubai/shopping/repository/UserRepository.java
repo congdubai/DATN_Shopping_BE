@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Modifying
     @Transactional
-    @Query("UPDATE User u SET u.active = true WHERE u.id = :id")
+    @Query("UPDATE User u SET u.isDeleted = true WHERE u.id = :id")
     void softDeleteUser(@Param("id") Long id);
 
     User findByEmail(String email);

@@ -12,6 +12,7 @@ public class ResUpdateUserDTO {
     private long id;
     private String name;
     private GenderEnum gender;
+    private String avatar;
     private String address;
     private int age;
     private Instant updatedAt;
