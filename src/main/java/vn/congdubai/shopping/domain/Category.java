@@ -40,7 +40,7 @@ public class Category {
     private String description;
 
     private String image;
-    // Quan hệ 1-nhiều với Product
+
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Product> products;

@@ -3,8 +3,11 @@ package vn.congdubai.shopping.domain;
 import java.time.Instant;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,7 +42,8 @@ public class Color {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
 
-    @OneToMany(mappedBy = "color")
+    @OneToMany(mappedBy = "color", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProductDetail> productDetail;
 
     @Column(name = "is_deleted", nullable = false)

@@ -66,13 +66,13 @@ public class ColorService {
         if (currentColor != null) {
             currentColor.setName(color.getName());
             currentColor.setDescription(color.getDescription());
+            currentColor.setHexCode(color.getHexCode());
             this.colorRepository.save(currentColor);
         }
         return currentColor;
     }
 
     // Delete color
-    // delete a product
     public void handleDeleteColor(long id) {
         this.colorRepository.softDeleteColor(id);
     }

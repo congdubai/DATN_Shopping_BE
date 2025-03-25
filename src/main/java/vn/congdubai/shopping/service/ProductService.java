@@ -62,7 +62,7 @@ public class ProductService {
     }
 
     // Create new product
-    public Product handleCreateProduct(Product product) throws IdInvalidException {
+    public Product handleCreateProduct(Product product) {
         Category category = categoryService.handleFetchCategoryById(product.getCategory().getId());
         product.setCategory(category);
         return productRepository.save(product);
