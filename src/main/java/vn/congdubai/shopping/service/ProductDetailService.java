@@ -116,4 +116,18 @@ public class ProductDetailService {
     public List<ProductDetail> handleGetProductDetailsByProduct(Product product) {
         return productDetailRepository.findByProduct(product);
     }
+
+    public String handleGetProductDetailByProductAndColor(Product product, Color color) {
+        // Tìm tất cả các ProductDetail theo product và color
+        List<ProductDetail> otpProduct = productDetailRepository.findByProductAndColor(product, color);
+
+        for (ProductDetail productDetail : otpProduct) {
+            if (productDetail.getImageDetail() != null && !productDetail.getImageDetail().isEmpty()) {
+                // Nếu có ảnh, trả về tên ảnh
+                return productDetail.getImageDetail();
+            }
+        }
+        return null;
+    }
+
 }

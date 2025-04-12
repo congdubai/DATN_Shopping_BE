@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.ProductDetail;
+import vn.congdubai.shopping.domain.response.RestResponse;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
+import vn.congdubai.shopping.service.ColorService;
 import vn.congdubai.shopping.service.ProductDetailService;
 import vn.congdubai.shopping.service.ProductService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
@@ -34,10 +39,13 @@ import vn.congdubai.shopping.util.error.IdInvalidException;
 public class ProductDetailController {
     private final ProductDetailService productDetailService;
     private final ProductService productService;
+    private final ColorService colorService;
 
-    public ProductDetailController(ProductDetailService productDetailService, ProductService productService) {
+    public ProductDetailController(ProductDetailService productDetailService, ProductService productService,
+            ColorService colorService) {
         this.productDetailService = productDetailService;
         this.productService = productService;
+        this.colorService = colorService;
     }
 
     @GetMapping("/productDetails")
@@ -83,6 +91,19 @@ public class ProductDetailController {
     public ResponseEntity<List<ProductDetail>> getProductDetails(@PathVariable("id") long id) {
         Product product = productService.handleFetchProductById(id);
         return ResponseEntity.ok(productDetailService.handleGetProductDetailsByProduct(product));
+    }
+
+    @GetMapping("/productDetailByColor/{productId}/{colorId}")
+    @ApiMessage("Fetch productDetail by color success")
+    public ResponseEntity<String> getProductDetailByColor(
+            @PathVariable long productId,
+            @PathVariable long colorId) {
+
+        Product product = this.productService.handleFetchProductById(productId);
+        Color color = this.colorService.handleFetchColorById(colorId);
+        String imageName = productDetailService.handleGetProductDetailByProductAndColor(product, color);
+
+        return ResponseEntity.ok(imageName != null ? imageName : "No image");
     }
 
 }

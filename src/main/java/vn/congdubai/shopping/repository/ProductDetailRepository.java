@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.transaction.Transactional;
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.ProductDetail;
 import java.util.List;
@@ -29,4 +30,6 @@ public interface ProductDetailRepository
                         @Param("sizeId") Long sizeId);
 
         List<ProductDetail> findByProduct(Product product);
+
+        List<ProductDetail> findByProductAndColor(Product product, Color color);
 }
