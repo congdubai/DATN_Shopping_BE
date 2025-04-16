@@ -30,4 +30,7 @@ public class CartDetail {
     @ManyToOne
     @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
+
+    private String color;
+    private String size;
 }
