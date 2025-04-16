@@ -12,8 +12,6 @@ import vn.congdubai.shopping.domain.ProductDetail;
 import vn.congdubai.shopping.domain.User;
 import vn.congdubai.shopping.repository.CartDetailRepository;
 import vn.congdubai.shopping.repository.CartRepository;
-import vn.congdubai.shopping.repository.OrderDetailRepository;
-import vn.congdubai.shopping.repository.OrderRepository;
 import vn.congdubai.shopping.repository.ProductDetailRepository;
 import vn.congdubai.shopping.repository.ProductRepository;
 import vn.congdubai.shopping.util.SecurityUtil;
@@ -99,7 +97,6 @@ public class CartService {
     public void handleRemoveCartDetail(long cartDetailId) {
         Optional<CartDetail> cartDetailOptional = this.cartDetailRepository.findById(cartDetailId);
         if (cartDetailOptional.isPresent()) {
-            long id = cartDetailId;
             CartDetail cartDetail = cartDetailOptional.get();
             Cart currentCart = cartDetail.getCart();
             // delete cart-detail

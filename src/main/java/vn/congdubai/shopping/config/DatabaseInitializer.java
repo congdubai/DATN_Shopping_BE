@@ -50,8 +50,21 @@ public class DatabaseInitializer implements CommandLineRunner {
             if (adminRole != null) {
                 adminUser.setRole(adminRole);
             }
-
             this.userRepository.save(adminUser);
+
+            User clientUser = new User();
+            clientUser.setEmail("user@gmail.com");
+            clientUser.setAddress("hn");
+            clientUser.setAge(25);
+            clientUser.setGender(GenderEnum.Nam);
+            clientUser.setName("I'm client");
+            clientUser.setPassword(this.passwordEncoder.encode("123456"));
+
+            Role clientRole = this.roleRepository.findByName("USER");
+            if (clientRole != null) {
+                clientUser.setRole(clientRole);
+            }
+            this.userRepository.save(clientUser);
         }
 
         if (countRoles > 0 && countUsers > 0) {
