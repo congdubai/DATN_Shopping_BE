@@ -4,11 +4,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.congdubai.shopping.domain.Cart;
 import vn.congdubai.shopping.domain.CartDetail;
-import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.User;
 import vn.congdubai.shopping.domain.response.ResCartDetailDTO;
 import vn.congdubai.shopping.domain.response.RestResponse;
@@ -21,13 +19,15 @@ import vn.congdubai.shopping.util.error.IdInvalidException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -81,7 +81,7 @@ public class CartController {
             }
         }
 
-        return ResponseEntity.ok(dtoList); // Trả về danh sách chi tiết giỏ hàng
+        return ResponseEntity.ok(dtoList);
 
     }
 
@@ -90,6 +90,28 @@ public class CartController {
     public ResponseEntity<Void> deleteCartItem(@PathVariable("id") long id) throws IdInvalidException {
         long cartDetailId = id;
         this.cartService.handleRemoveCartDetail(cartDetailId);
+        return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/place-order")
+    public ResponseEntity<Void> handlePlaceOrder(@RequestParam("receiverName") String receiverName,
+            @RequestParam("receiverAddress") String receiverAddress,
+            @RequestParam("receiverPhone") String receiverPhone,
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam("totalPrice") Double totalPrice) {
+
+        Optional<String> optionalUsername = SecurityUtil.getCurrentUserLogin();
+        User user = userService.handleGetUserByUsername(optionalUsername.get());
+        final String uuid = UUID.randomUUID().toString().replace("-", "");
+        this.cartService.handlePlaceOrder(user, receiverName, receiverAddress, receiverPhone,
+                paymentMethod, uuid, totalPrice);
+        return ResponseEntity.ok(null);
+    }
+
+    @PutMapping("/cart")
+    public ResponseEntity<Void> updateQuantity(@RequestParam("id") long id,
+            @RequestParam("quantity") long quantity) {
+        this.cartService.handleUpdateQuantity(id, quantity);
         return ResponseEntity.ok(null);
     }
 
