@@ -1,6 +1,7 @@
 package vn.congdubai.shopping.domain.response;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,8 +21,8 @@ public class ResUserDTO {
     private GenderEnum gender;
     private String address;
     private int age;
-    private Instant updatedAt;
-    private Instant createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
     private RoleUser role;
 
     @Getter

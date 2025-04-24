@@ -52,7 +52,7 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/api/v1/cart/**", "/api/v1/add-to-cart", "/api/v1/products/**", "/api/v1/productDetails/**",
-                "/api/v1/colors/**", "/api/v1/categories/**", "/api/v1/sizes/**"
+                "/api/v1/colors/**", "/api/v1/categories/**", "/api/v1/sizes/**", "/api/v1/dashboard/**"
         };
 
         http

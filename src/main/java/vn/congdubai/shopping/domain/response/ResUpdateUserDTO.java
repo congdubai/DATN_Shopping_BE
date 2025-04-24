@@ -1,6 +1,6 @@
 package vn.congdubai.shopping.domain.response;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,5 +15,5 @@ public class ResUpdateUserDTO {
     private String avatar;
     private String address;
     private int age;
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 }

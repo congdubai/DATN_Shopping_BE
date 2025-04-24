@@ -1,6 +1,7 @@
 package vn.congdubai.shopping.domain;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -44,10 +45,8 @@ public class User {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
-    private Instant createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
-    private Instant updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
 
@@ -63,7 +62,7 @@ public class User {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
@@ -71,6 +70,6 @@ public class User {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        this.updatedAt = Instant.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }
