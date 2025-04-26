@@ -36,6 +36,16 @@ public class DatabaseInitializer implements CommandLineRunner {
             adminRole.setName("ADMIN");
             adminRole.setDescription("Admin thì full permissions");
             this.roleRepository.save(adminRole);
+
+            Role clientRole = new Role();
+            clientRole.setName("USER");
+            clientRole.setDescription("USER");
+            this.roleRepository.save(clientRole);
+
+            Role staffRole = new Role();
+            staffRole.setName("STAFF");
+            staffRole.setDescription("STAFF");
+            this.roleRepository.save(staffRole);
         }
         if (countUsers == 0) {
             User adminUser = new User();
@@ -65,6 +75,20 @@ public class DatabaseInitializer implements CommandLineRunner {
                 clientUser.setRole(clientRole);
             }
             this.userRepository.save(clientUser);
+
+            User staffUser = new User();
+            staffUser.setEmail("staff@gmail.com");
+            staffUser.setAddress("hn");
+            staffUser.setAge(25);
+            staffUser.setGender(GenderEnum.Nam);
+            staffUser.setName("I'm staff");
+            staffUser.setPassword(this.passwordEncoder.encode("123456"));
+
+            Role staffRole = this.roleRepository.findByName("STAFF");
+            if (staffRole != null) {
+                staffUser.setRole(staffRole);
+            }
+            this.userRepository.save(staffUser);
         }
 
         if (countRoles > 0 && countUsers > 0) {

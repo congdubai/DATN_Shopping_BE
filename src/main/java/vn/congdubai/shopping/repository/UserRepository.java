@@ -24,5 +24,5 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     User findByRefreshTokenAndEmail(String token, String email);
 
     @Query(value = "SELECT COUNT(*) FROM tbluser WHERE DATE(created_at) = CURRENT_DATE", nativeQuery = true)
-    long countUsersByToday();
+    long countUsersByDay();
 }
