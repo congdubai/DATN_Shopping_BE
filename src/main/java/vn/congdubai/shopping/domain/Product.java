@@ -70,6 +70,10 @@ public class Product {
     @JsonIgnore
     private List<ProductDetail> productDetails;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Review> reviews;
+
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
