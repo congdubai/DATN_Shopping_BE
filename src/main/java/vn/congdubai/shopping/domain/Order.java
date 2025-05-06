@@ -53,6 +53,7 @@ public class Order {
     private String paymentRef;
     private String paymentStatus;
     private String paymentMethod;
+    private boolean isRating;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @JsonIgnore

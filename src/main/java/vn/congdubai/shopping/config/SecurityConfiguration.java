@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,7 +54,8 @@ public class SecurityConfiguration {
                 "/swagger-ui.html",
                 "/api/v1/cart/**", "/api/v1/add-to-cart", "/api/v1/products/**", "/api/v1/productDetails/**",
                 "/api/v1/colors/**", "/api/v1/categories/**", "/api/v1/sizes/**", "/api/v1/dashboard/**",
-                "/api/v1/review"
+                "/api/v1/review", "/api/v1/list-categories"
+
         };
 
         http
@@ -63,13 +65,9 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
                                 .anyRequest().authenticated())
+
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                // .exceptionHandling(
-                // exceptions -> exceptions
-                // .authenticationEntryPoint(customAuthenticationEntryPoint) // 401
-                // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
-
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

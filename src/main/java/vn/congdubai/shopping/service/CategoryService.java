@@ -1,5 +1,6 @@
 package vn.congdubai.shopping.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -41,6 +42,13 @@ public class CategoryService {
         return rs;
     }
 
+    // Fetch all category
+    public List<Category> handleFetchAllCategories() {
+        Specification<Category> notDeletedSpec = notDeletedSpec();
+        List<Category> pCategory = this.categoryRepository.findAll(notDeletedSpec);
+        return pCategory;
+    }
+
     // Fetch category by id
     public Category handleFetchCategoryById(long id) {
         Optional<Category> categoryOptional = this.categoryRepository.findById(id);
@@ -64,6 +72,7 @@ public class CategoryService {
         Category currentCategory = this.handleFetchCategoryById(category.getId());
         if (currentCategory != null) {
             currentCategory.setName(category.getName());
+            currentCategory.setGender(category.getGender());
             currentCategory.setDescription(category.getDescription());
             currentCategory.setImage(category.getImage());
             this.categoryRepository.save(currentCategory);

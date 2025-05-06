@@ -1,5 +1,7 @@
 package vn.congdubai.shopping.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,4 +20,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     void softDeleteProduct(@Param("id") Long id);
 
     boolean existsByName(String name);
+
+    @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND p.category.gender = :gender")
+    Page<Product> findByCategoryGender(@Param("gender") vn.congdubai.shopping.util.constant.GenderEnum gender,
+            Pageable pageable);
+
 }

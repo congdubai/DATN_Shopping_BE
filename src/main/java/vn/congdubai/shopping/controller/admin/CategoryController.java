@@ -1,5 +1,7 @@
 package vn.congdubai.shopping.controller.admin;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,12 @@ public class CategoryController {
     public ResponseEntity<ResultPaginationDTO> fetchCategories(
             @Filter Specification<Category> spec, Pageable pageable) {
         return ResponseEntity.ok(this.categoryService.handleFetchCategories(spec, pageable));
+    }
+
+    @GetMapping("/list-categories")
+    @ApiMessage("Fetch all products")
+    public ResponseEntity<List<Category>> fetchCategorieMenu() {
+        return ResponseEntity.ok(this.categoryService.handleFetchAllCategories());
     }
 
     @PostMapping("/categories")

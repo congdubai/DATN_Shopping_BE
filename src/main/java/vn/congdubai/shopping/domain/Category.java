@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import vn.congdubai.shopping.util.SecurityUtil;
+import vn.congdubai.shopping.util.constant.GenderEnum;
 
 @Entity
 @Table(name = "tblcategory")
@@ -52,6 +55,9 @@ public class Category {
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
+
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
 
     @PrePersist
     public void handleBeforeCreate() {

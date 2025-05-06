@@ -1,19 +1,25 @@
 package vn.congdubai.shopping.controller.admin;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import vn.congdubai.shopping.controller.client.AuthController;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
+import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.User;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.CategoryRepository;
 import vn.congdubai.shopping.service.ProductService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
+import vn.congdubai.shopping.util.constant.GenderEnum;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -30,10 +36,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class ProductController {
 
     private final ProductService productService;
+    private final CategoryRepository categoryRepository;
 
     public ProductController(ProductService productService, CategoryRepository categoryRepository,
             AuthController authController) {
         this.productService = productService;
+        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping("/products")
@@ -76,4 +84,35 @@ public class ProductController {
         }
         return ResponseEntity.ok(product);
     }
+
+    @GetMapping("/products/by-category/{categoryId}")
+    @ApiMessage("Fetch products by category")
+    public ResponseEntity<ResultPaginationDTO> fetchProductsByCategory(
+            @PathVariable Long categoryId,
+            @Filter Specification<Product> spec,
+            Pageable pageable) {
+        Category category = this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category không tồn tại"));
+
+        return ResponseEntity.ok(productService.handleFetchProductsByCategory(spec, pageable, category));
+    }
+
+    @GetMapping("/products/{gender}")
+    @ApiMessage("Fetch products by gender")
+    public ResponseEntity<ResultPaginationDTO> fetchProductsByGender(
+            @PathVariable String gender,
+            Pageable pageable) {
+
+        GenderEnum genderEnum;
+        try {
+            genderEnum = GenderEnum.valueOf(gender);
+        } catch (IllegalArgumentException e) {
+            ResultPaginationDTO errorResponse = new ResultPaginationDTO();
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // Trả về kết quả phân trang
+        return ResponseEntity.ok(productService.handleFetchProductsByGender(genderEnum, pageable));
+    }
+
 }

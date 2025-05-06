@@ -2,6 +2,7 @@ package vn.congdubai.shopping.service;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import vn.congdubai.shopping.domain.Order;
 import vn.congdubai.shopping.domain.OrderDetail;
 import vn.congdubai.shopping.domain.User;
 import vn.congdubai.shopping.domain.response.ResOrderHistoryDTO;
+import vn.congdubai.shopping.domain.response.ResProductSalesDTO;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.OrderRepository;
 
@@ -35,6 +37,8 @@ public class OrderService {
         dto.setQuantity(orderDetail.getQuantity());
         dto.setPrice(orderDetail.getPrice());
         dto.setStatus(orderDetail.getOrder().getStatus());
+        dto.setRating(orderDetail.getOrder().isRating());
+        dto.setUserId(orderDetail.getOrder().getUser().getId());
         return dto;
     }
 
@@ -58,6 +62,25 @@ public class OrderService {
 
         rs.setMeta(mt);
         rs.setResult(listDTO);
+
+        return rs;
+    }
+
+    public ResultPaginationDTO handleFetchTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate,
+            Pageable pageable) {
+        Page<ResProductSalesDTO> topSellingProductsPage = orderRepository.findTopSellingProducts(startDate, endDate,
+                pageable);
+
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+
+        mt.setPage(pageable.getPageNumber() + 1); // Page number is 1-based for user-friendly response
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(topSellingProductsPage.getTotalPages());
+        mt.setTotal(topSellingProductsPage.getTotalElements());
+
+        rs.setMeta(mt);
+        rs.setResult(topSellingProductsPage.getContent()); // Set the content to the list of products
 
         return rs;
     }

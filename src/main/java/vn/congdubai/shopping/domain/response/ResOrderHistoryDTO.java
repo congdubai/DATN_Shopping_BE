@@ -16,4 +16,6 @@ public class ResOrderHistoryDTO {
     private long quantity;
     private double price;
     private String status;
+    private boolean isRating;
+    private long userId;
 }

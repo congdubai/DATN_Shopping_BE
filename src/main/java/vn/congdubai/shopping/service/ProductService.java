@@ -11,6 +11,7 @@ import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.ProductRepository;
+import vn.congdubai.shopping.util.constant.GenderEnum;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
 @Service
@@ -33,6 +34,27 @@ public class ProductService {
     public ResultPaginationDTO handleFetchProducts(Specification<Product> spec, Pageable pageable) {
         Specification<Product> notDeletedSpec = notDeletedSpec().and(spec); // Kết hợp với spec của người dùng
         Page<Product> pProducts = this.productRepository.findAll(notDeletedSpec, pageable);
+
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(pProducts.getTotalPages());
+        mt.setTotal(pProducts.getTotalElements());
+
+        rs.setMeta(mt);
+        rs.setResult(pProducts.getContent());
+        return rs;
+    }
+
+    public ResultPaginationDTO handleFetchProductsByCategory(Specification<Product> spec, Pageable pageable,
+            Category category) {
+        Specification<Product> categorySpec = (root, query, cb) -> cb.equal(root.get("category"), category);
+
+        Specification<Product> finalSpec = notDeletedSpec().and(spec).and(categorySpec);
+
+        Page<Product> pProducts = this.productRepository.findAll(finalSpec, pageable);
 
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
@@ -90,4 +112,26 @@ public class ProductService {
     public void handleDeleteProduct(long id) {
         this.productRepository.softDeleteProduct(id);
     }
+
+    // fetch product by gender
+    public ResultPaginationDTO handleFetchProductsByGender(GenderEnum gender, Pageable pageable) {
+        // Tạo Specification lọc theo gender và không bị xóa
+        Specification<Product> spec = notDeletedSpec()
+                .and((root, query, cb) -> cb.equal(root.get("category").get("gender"), gender));
+
+        Page<Product> pProducts = this.productRepository.findAll(spec, pageable);
+
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(pProducts.getTotalPages());
+        mt.setTotal(pProducts.getTotalElements());
+
+        rs.setMeta(mt);
+        rs.setResult(pProducts.getContent());
+        return rs;
+    }
+
 }
