@@ -16,28 +16,30 @@ import vn.congdubai.shopping.domain.response.ResProductSalesDTO;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE", nativeQuery = true)
-    double getTotalPriceByDay();
+        @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE", nativeQuery = true)
+        double getTotalPriceByDay();
 
-    Page<Order> findByUser(User user, Pageable pageable);
+        Page<Order> findByUser(User user, Pageable pageable);
 
-    // lấy đơn hàng gần nhất theo ngày
-    @Query(value = "SELECT * FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE ORDER BY order_date DESC", nativeQuery = true)
-    List<Order> getCurrentOrderByDay();
+        // lấy đơn hàng gần nhất theo ngày
+        @Query(value = "SELECT * FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE ORDER BY order_date DESC", nativeQuery = true)
+        List<Order> getCurrentOrderByDay();
 
-    @Query("SELECT new vn.congdubai.shopping.domain.response.ResProductSalesDTO(p.id, p.name, p.image, " +
-            "SUM(od.quantity), MIN(p.price), COALESCE(AVG(r.rating), 0)) " +
-            "FROM OrderDetail od " +
-            "JOIN od.productDetail pd " +
-            "JOIN pd.product p " +
-            "JOIN od.order o " +
-            "LEFT JOIN Review r ON r.product.id = p.id " +
-            "WHERE p.isDeleted = false AND pd.isDeleted = false " +
-            "AND o.orderDate BETWEEN :startDate AND :endDate " +
-            "GROUP BY p.id, p.name, p.image " +
-            "ORDER BY SUM(od.quantity) DESC")
-    Page<ResProductSalesDTO> findTopSellingProducts(@Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate,
-            Pageable pageable);
+        @Query("SELECT new vn.congdubai.shopping.domain.response.ResProductSalesDTO(" +
+                        "pd.id, p.name, pd.imageDetail, " +
+                        "SUM(od.quantity), MIN(p.price), COALESCE(AVG(r.rating), 0)) " +
+                        "FROM OrderDetail od " +
+                        "JOIN od.productDetail pd " +
+                        "JOIN pd.product p " +
+                        "JOIN od.order o " +
+                        "LEFT JOIN Review r ON r.product.id = p.id " +
+                        "WHERE p.isDeleted = false " +
+                        "AND pd.isDeleted = false " +
+                        "AND o.orderDate BETWEEN :startDate AND :endDate " +
+                        "GROUP BY pd.id, p.name, pd.imageDetail " +
+                        "ORDER BY SUM(od.quantity) DESC")
+        List<ResProductSalesDTO> findTopSellingProducts(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 
 }

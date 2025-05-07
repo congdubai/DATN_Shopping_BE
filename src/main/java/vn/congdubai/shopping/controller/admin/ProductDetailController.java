@@ -86,13 +86,6 @@ public class ProductDetailController {
         return ResponseEntity.ok(productDetail);
     }
 
-    @GetMapping("/productDetails/{id}")
-    @ApiMessage("Fetch productDetail success")
-    public ResponseEntity<List<ProductDetail>> getProductDetails(@PathVariable("id") long id) {
-        Product product = productService.handleFetchProductById(id);
-        return ResponseEntity.ok(productDetailService.handleGetProductDetailsByProduct(product));
-    }
-
     @GetMapping("/productDetailByColor/{productId}/{colorId}")
     @ApiMessage("Fetch productDetail by color success")
     public ResponseEntity<String> getProductDetailByColor(
@@ -106,4 +99,16 @@ public class ProductDetailController {
         return ResponseEntity.ok(imageName != null ? imageName : "No image");
     }
 
+    @GetMapping("/productDetails/by-product/{productId}")
+    @ApiMessage("Fetch productDetail success")
+    public ResponseEntity<List<ProductDetail>> getProductDetailsByProduct(@PathVariable("productId") long id) {
+        Product product = productService.handleFetchProductById(id);
+        return ResponseEntity.ok(productDetailService.handleGetProductDetailsByProduct(product));
+    }
+
+    @GetMapping("/productDetails/{id}")
+    @ApiMessage("Fetch productDetail success")
+    public ResponseEntity<ProductDetail> getProductDetailsById(@PathVariable("id") long id) {
+        return ResponseEntity.ok(productDetailService.handleFetchProductDetailById(id));
+    }
 }

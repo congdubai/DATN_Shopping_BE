@@ -14,6 +14,7 @@ import vn.congdubai.shopping.util.SecurityUtil;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -46,11 +47,10 @@ public class OrderController {
 
     @GetMapping("/orders/top-selling")
     @ApiMessage("Fetch top selling products within a date range")
-    public ResponseEntity<ResultPaginationDTO> getTopSellingProducts(
+    public ResponseEntity<List<ResProductSalesDTO>> getTopSellingProducts(
             @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate,
-            Pageable pageable) {
-        return ResponseEntity.ok(this.orderService.handleFetchTopSellingProducts(startDate, endDate, pageable));
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.orderService.handleFetchTopSellingProducts(startDate, endDate));
     }
 
 }

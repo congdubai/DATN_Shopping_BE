@@ -66,23 +66,10 @@ public class OrderService {
         return rs;
     }
 
-    public ResultPaginationDTO handleFetchTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate,
-            Pageable pageable) {
-        Page<ResProductSalesDTO> topSellingProductsPage = orderRepository.findTopSellingProducts(startDate, endDate,
-                pageable);
-
-        ResultPaginationDTO rs = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
-
-        mt.setPage(pageable.getPageNumber() + 1); // Page number is 1-based for user-friendly response
-        mt.setPageSize(pageable.getPageSize());
-        mt.setPages(topSellingProductsPage.getTotalPages());
-        mt.setTotal(topSellingProductsPage.getTotalElements());
-
-        rs.setMeta(mt);
-        rs.setResult(topSellingProductsPage.getContent()); // Set the content to the list of products
-
-        return rs;
+    public List<ResProductSalesDTO> handleFetchTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate
+            ) {
+        List<ResProductSalesDTO> topSellingProductsPage = orderRepository.findTopSellingProducts(startDate, endDate);
+        return topSellingProductsPage;
     }
 
 }
