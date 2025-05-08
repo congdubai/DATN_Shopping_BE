@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,16 @@ public class OrderController {
             @RequestParam LocalDateTime startDate,
             @RequestParam LocalDateTime endDate) {
         return ResponseEntity.ok(this.orderService.handleFetchTopSellingProducts(startDate, endDate));
+    }
+
+    @GetMapping("/orders/slow-selling")
+    @ApiMessage("Fetch slow selling products within a date range")
+    public ResponseEntity<List<ResProductSalesDTO>> getSlowSellingProducts(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+
+        List<ResProductSalesDTO> result = orderService.handleFetchSlowSellingProducts(startDate, endDate);
+        return ResponseEntity.ok(result);
     }
 
 }

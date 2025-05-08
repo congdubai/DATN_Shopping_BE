@@ -16,30 +16,63 @@ import vn.congdubai.shopping.domain.response.ResProductSalesDTO;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-        @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE", nativeQuery = true)
-        double getTotalPriceByDay();
+    @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE", nativeQuery = true)
+    double getTotalPriceByDay();
 
-        Page<Order> findByUser(User user, Pageable pageable);
+    Page<Order> findByUser(User user, Pageable pageable);
 
-        // lấy đơn hàng gần nhất theo ngày
-        @Query(value = "SELECT * FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE ORDER BY order_date DESC", nativeQuery = true)
-        List<Order> getCurrentOrderByDay();
+    // lấy đơn hàng gần nhất theo ngày
+    @Query(value = "SELECT * FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE ORDER BY order_date DESC", nativeQuery = true)
+    List<Order> getCurrentOrderByDay();
 
-        @Query("SELECT new vn.congdubai.shopping.domain.response.ResProductSalesDTO(" +
-                        "pd.id, p.name, pd.imageDetail, " +
-                        "SUM(od.quantity), MIN(p.price), COALESCE(AVG(r.rating), 0)) " +
-                        "FROM OrderDetail od " +
-                        "JOIN od.productDetail pd " +
-                        "JOIN pd.product p " +
-                        "JOIN od.order o " +
-                        "LEFT JOIN Review r ON r.product.id = p.id " +
-                        "WHERE p.isDeleted = false " +
-                        "AND pd.isDeleted = false " +
-                        "AND o.orderDate BETWEEN :startDate AND :endDate " +
-                        "GROUP BY pd.id, p.name, pd.imageDetail " +
-                        "ORDER BY SUM(od.quantity) DESC")
-        List<ResProductSalesDTO> findTopSellingProducts(
-                        @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+    @Query("SELECT new vn.congdubai.shopping.domain.response.ResProductSalesDTO(" +
+            "pd.id, p.name, pd.imageDetail, " +
+            "SUM(od.quantity), MIN(p.price), COALESCE(AVG(r.rating), 0)) " +
+            "FROM OrderDetail od " +
+            "JOIN od.productDetail pd " +
+            "JOIN pd.product p " +
+            "JOIN od.order o " +
+            "LEFT JOIN Review r ON r.product.id = p.id " +
+            "WHERE p.isDeleted = false " +
+            "AND pd.isDeleted = false " +
+            "AND o.orderDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY pd.id, p.name, pd.imageDetail " +
+            "ORDER BY SUM(od.quantity) DESC")
+    List<ResProductSalesDTO> findTopSellingProducts(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    @Query("""
+            SELECT new vn.congdubai.shopping.domain.response.ResProductSalesDTO(
+                pd.id,
+                p.name,
+                pd.imageDetail,
+                COALESCE(SUM(od.quantity), 0),
+                MIN(p.price),
+                COALESCE((
+                    SELECT AVG(r.rating)
+                    FROM Review r
+                    WHERE r.product.id = p.id
+                ), 0)
+            )
+            FROM ProductDetail pd
+            JOIN pd.product p
+            LEFT JOIN OrderDetail od ON od.productDetail.id = pd.id
+            LEFT JOIN Order o ON od.order.id = o.id
+            WHERE
+                p.isDeleted = false
+                AND pd.isDeleted = false
+                AND pd.quantity >= 5
+                AND pd.createdAt <= :minCreatedDate
+                AND (o.orderDate BETWEEN :fromDate AND :toDate OR o.orderDate IS NULL)
+            GROUP BY
+                pd.id, p.name, pd.imageDetail, pd.createdAt
+            HAVING
+                COALESCE(SUM(od.quantity), 0) <= 5
+            """)
+    List<ResProductSalesDTO> findLowSalesProducts(
+            @Param("minCreatedDate") LocalDateTime minCreatedDate,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate);
 
 }

@@ -1,6 +1,7 @@
 package vn.congdubai.shopping.domain;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.annotations.Filter;
@@ -56,8 +57,8 @@ public class Product {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
 
@@ -79,7 +80,7 @@ public class Product {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        setCreatedAt(Instant.now());
+        setCreatedAt(LocalDateTime.now());
     }
 
     @PreUpdate
@@ -87,6 +88,6 @@ public class Product {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        setUpdatedAt(Instant.now());
+        setUpdatedAt(LocalDateTime.now());
     }
 }

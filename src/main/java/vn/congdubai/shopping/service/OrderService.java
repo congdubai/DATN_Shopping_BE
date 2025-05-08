@@ -66,10 +66,15 @@ public class OrderService {
         return rs;
     }
 
-    public List<ResProductSalesDTO> handleFetchTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate
-            ) {
+    public List<ResProductSalesDTO> handleFetchTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate) {
         List<ResProductSalesDTO> topSellingProductsPage = orderRepository.findTopSellingProducts(startDate, endDate);
         return topSellingProductsPage;
+    }
+
+    public List<ResProductSalesDTO> handleFetchSlowSellingProducts(LocalDateTime fromDate, LocalDateTime toDate) {
+        LocalDateTime minCreatedDate = toDate.minusDays(10);
+
+        return orderRepository.findLowSalesProducts(minCreatedDate, fromDate, toDate);
     }
 
 }

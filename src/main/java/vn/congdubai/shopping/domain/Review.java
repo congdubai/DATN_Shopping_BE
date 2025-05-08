@@ -1,8 +1,6 @@
 package vn.congdubai.shopping.domain;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -49,11 +47,10 @@ public class Review {
 
     private String comment;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @PrePersist
     public void handleBeforeCreate() {
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
