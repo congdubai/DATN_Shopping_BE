@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import vn.congdubai.shopping.domain.response.RestResponse;
+import vn.congdubai.shopping.domain.response.ResResponse;
 
 @RestControllerAdvice
 public class GlobalException {
 
     // handle all exception
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<RestResponse<Object>> handleAllException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
+    public ResponseEntity<ResResponse<Object>> handleAllException(Exception ex) {
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         res.setMessage(ex.getMessage());
         res.setError("Internal Server Error");
@@ -34,8 +34,8 @@ public class GlobalException {
             BadCredentialsException.class,
             IdInvalidException.class,
     })
-    public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
+    public ResponseEntity<ResResponse<Object>> handleIdException(Exception ex) {
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setMessage(ex.getMessage());
         res.setError("Exception occurs...");
@@ -45,8 +45,8 @@ public class GlobalException {
     @ExceptionHandler(value = {
             NoResourceFoundException.class,
     })
-    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
+    public ResponseEntity<ResResponse<Object>> handleNotFoundException(Exception ex) {
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.NOT_FOUND.value());
         res.setMessage(ex.getMessage());
         res.setError("404 Not Found. URL may not exist...");
@@ -54,11 +54,11 @@ public class GlobalException {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RestResponse<Object>> validationError(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ResResponse<Object>> validationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         final List<FieldError> fieldErrors = result.getFieldErrors();
 
-        RestResponse<Object> res = new RestResponse<Object>();
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(ex.getBody().getDetail());
 
@@ -71,8 +71,8 @@ public class GlobalException {
     @ExceptionHandler(value = {
             StorageException.class,
     })
-    public ResponseEntity<RestResponse<Object>> handleFileUploadException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
+    public ResponseEntity<ResResponse<Object>> handleFileUploadException(Exception ex) {
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setMessage(ex.getMessage());
         res.setError("Exception upload file...");
@@ -82,8 +82,8 @@ public class GlobalException {
     @ExceptionHandler(value = {
             PermissionException.class,
     })
-    public ResponseEntity<RestResponse<Object>> handlePermissionException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
+    public ResponseEntity<ResResponse<Object>> handlePermissionException(Exception ex) {
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(HttpStatus.FORBIDDEN.value());
         res.setError("Forbidden");
         res.setMessage(ex.getMessage());

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import jakarta.servlet.http.HttpServletResponse;
-import vn.congdubai.shopping.domain.response.RestResponse;
+import vn.congdubai.shopping.domain.response.ResResponse;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 
 @ControllerAdvice
@@ -32,7 +32,7 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
         HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
         int status = servletResponse.getStatus();
 
-        RestResponse<Object> res = new RestResponse<Object>();
+        ResResponse<Object> res = new ResResponse<Object>();
         res.setStatusCode(status);
 
         if (body instanceof String || body instanceof Resource) {

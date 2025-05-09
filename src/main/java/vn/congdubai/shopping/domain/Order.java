@@ -54,6 +54,7 @@ public class Order {
     private String paymentStatus;
     private String paymentMethod;
     private boolean isRating;
+    private String OrderEmail;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @JsonIgnore

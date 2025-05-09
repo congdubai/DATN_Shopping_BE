@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.ProductDetail;
-import vn.congdubai.shopping.domain.response.RestResponse;
+import vn.congdubai.shopping.domain.response.ResResponse;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.service.ColorService;
 import vn.congdubai.shopping.service.ProductDetailService;

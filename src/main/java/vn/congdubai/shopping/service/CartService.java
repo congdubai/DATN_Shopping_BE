@@ -122,10 +122,10 @@ public class CartService {
         }
     }
 
-    public void handlePlaceOrder(
+    public Order handlePlaceOrder(
             User user, String receiverName, String receiverAddress, String receiverPhone, String paymentMethod,
             String uuid, Double finalPrice) {
-
+        Order currentOrder = new Order();
         // Step 1: Get cart by user
         Cart cart = this.cartRepository.findByUserId(user.getId());
         if (cart != null) {
@@ -156,7 +156,7 @@ public class CartService {
                     order.setTotalPrice(sum);
                 }
 
-                order = this.orderRepository.save(order);
+                currentOrder = this.orderRepository.save(order);
 
                 // Create orderDetail for each product in the cart
                 for (CartDetail cd : cartDetails) {
@@ -186,6 +186,7 @@ public class CartService {
                 this.cartRepository.deleteById(cart.getId());
             }
         }
+        return currentOrder;
     }
 
     public void handleUpdateQuantity(long cartDetailId, long quantity) {
