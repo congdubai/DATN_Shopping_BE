@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import vn.congdubai.shopping.config.VNPayConfig;
 import vn.congdubai.shopping.domain.Cart;
 import vn.congdubai.shopping.domain.CartDetail;
 import vn.congdubai.shopping.domain.Order;
@@ -21,25 +20,18 @@ import vn.congdubai.shopping.repository.OrderRepository;
 import vn.congdubai.shopping.service.CartService;
 import vn.congdubai.shopping.service.EmailService;
 import vn.congdubai.shopping.service.UserService;
+import vn.congdubai.shopping.service.VNPayService;
 import vn.congdubai.shopping.util.SecurityUtil;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,10 +45,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class CartController {
     private final CartService cartService;
     private final UserService userService;
+    private final EmailService emailService;
+    private final VNPayService vnPayService;
 
-    public CartController(CartService cartService, UserService userService) {
+    public CartController(CartService cartService, UserService userService, EmailService emailService,
+            VNPayService vnPayService) {
         this.cartService = cartService;
         this.userService = userService;
+        this.emailService = emailService;
+        this.vnPayService = vnPayService;
     }
 
     @PostMapping("/add-to-cart")
@@ -112,106 +109,69 @@ public class CartController {
         return ResponseEntity.ok(null);
     }
 
-    @RestController
-    @RequestMapping("/api/v1")
-    public class OrderController {
+    @PostMapping("/place-order")
+    public ResponseEntity<?> handlePlaceOrder(
+            HttpServletRequest req,
+            @RequestParam("receiverName") String receiverName,
+            @RequestParam("receiverAddress") String receiverAddress,
+            @RequestParam("receiverPhone") String receiverPhone,
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam("totalPrice") Double totalPrice) throws IOException {
 
-        private final CartService cartService;
-        private final UserService userService;
-        private final OrderRepository orderRepository;
-        private final EmailService emailService;
-
-        public OrderController(CartService cartService, UserService userService,
-                OrderRepository orderRepository, EmailService emailService) {
-            this.cartService = cartService;
-            this.userService = userService;
-            this.orderRepository = orderRepository;
-            this.emailService = emailService;
+        Optional<String> optionalUsername = SecurityUtil.getCurrentUserLogin();
+        if (optionalUsername.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
 
-        @PostMapping("/place-order")
-        public ResponseEntity<?> handlePlaceOrder(
-                HttpServletRequest req,
-                @RequestParam("receiverName") String receiverName,
-                @RequestParam("receiverAddress") String receiverAddress,
-                @RequestParam("receiverPhone") String receiverPhone,
-                @RequestParam("paymentMethod") String paymentMethod,
-                @RequestParam("totalPrice") Double totalPrice) throws IOException {
+        User user = userService.handleGetUserByUsername(optionalUsername.get());
+        final String uuid = UUID.randomUUID().toString().replace("-", "");
 
-            Optional<String> optionalUsername = SecurityUtil.getCurrentUserLogin();
-            if (optionalUsername.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-            }
+        if (paymentMethod.equalsIgnoreCase("vnpay")) {
+            // Tạo Order tạm thời với trạng thái chờ thanh toán
+            Order order = this.cartService.handlePlaceOrder(user, receiverName, receiverAddress, receiverPhone,
+                    paymentMethod, uuid, totalPrice);
+            String ip = this.vnPayService.getIpAddress(req);
+            String vnpUrl = this.vnPayService.generateVNPayURL(totalPrice, uuid, ip);
 
-            User user = userService.handleGetUserByUsername(optionalUsername.get());
-            final String uuid = UUID.randomUUID().toString().replace("-", "");
-
-            if (paymentMethod.equalsIgnoreCase("vnpay")) {
-                // Tạo Order tạm thời với trạng thái chờ thanh toán
-                Order order = cartService.handlePlaceOrder(user, receiverName, receiverAddress, receiverPhone,
-                        paymentMethod, uuid, totalPrice);
-
-                // Tạo VNPay URL
-                String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
-                String vnp_IpAddr = VNPayConfig.getIpAddress(req);
-
-                Map<String, String> vnp_Params = new HashMap<>();
-                vnp_Params.put("vnp_Version", VNPayConfig.vnp_Version);
-                vnp_Params.put("vnp_Command", VNPayConfig.vnp_Command);
-                vnp_Params.put("vnp_TmnCode", VNPayConfig.vnp_TmnCode);
-                vnp_Params.put("vnp_Amount", String.valueOf((long) (totalPrice * 100))); // nhân 100 theo VNPay yêu cầu
-                vnp_Params.put("vnp_CurrCode", "VND");
-                vnp_Params.put("vnp_BankCode", "NCB");
-                vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-                vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
-                vnp_Params.put("vnp_OrderType", VNPayConfig.orderType);
-                vnp_Params.put("vnp_Locale", "vn");
-                vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl + "?orderId=" + order.getId());
-                vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
-
-                Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-                vnp_Params.put("vnp_CreateDate", formatter.format(cld.getTime()));
-
-                cld.add(Calendar.MINUTE, 15);
-                vnp_Params.put("vnp_ExpireDate", formatter.format(cld.getTime()));
-
-                List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
-                Collections.sort(fieldNames);
-                StringBuilder hashData = new StringBuilder();
-                StringBuilder query = new StringBuilder();
-                for (String fieldName : fieldNames) {
-                    String fieldValue = vnp_Params.get(fieldName);
-                    if (fieldValue != null && !fieldValue.isEmpty()) {
-                        hashData.append(fieldName).append('=')
-                                .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-                        query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII))
-                                .append('=')
-                                .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII))
-                                .append('&');
-                    }
-                }
-
-                query.setLength(query.length() - 1); // remove trailing '&'
-                hashData.setLength(hashData.length() - 1);
-
-                String vnp_SecureHash = VNPayConfig.hmacSHA512(VNPayConfig.secretKey, hashData.toString());
-                String paymentUrl = VNPayConfig.vnp_PayUrl + "?" + query + "&vnp_SecureHash=" + vnp_SecureHash;
-
-                JsonObject job = new JsonObject();
-                job.addProperty("statusCode", "00");
-                job.addProperty("message", "success");
-                job.addProperty("data", paymentUrl);
-
-                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                return ResponseEntity.ok(gson.toJson(job));
-            } else {
-                // Thanh toán thường → xử lý luôn
-                cartService.handlePlaceOrder(user, receiverName, receiverAddress, receiverPhone,
-                        paymentMethod, uuid, totalPrice);
-                return ResponseEntity.ok("Đặt hàng thành công");
-            }
+            JsonObject job = new JsonObject();
+            job.addProperty("statusCode", "00");
+            job.addProperty("message", "success");
+            job.addProperty("data", vnpUrl);
+            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+            return ResponseEntity.ok(gson.toJson(job));
+        } else {
+            // Thanh toán thường → xử lý luôn
+            this.cartService.handlePlaceOrder(user, receiverName, receiverAddress, receiverPhone,
+                    paymentMethod, uuid, totalPrice);
+            JsonObject job = new JsonObject();
+            job.addProperty("statusCode", "200");
+            job.addProperty("message", "success");
+            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+            return ResponseEntity.ok(gson.toJson(job));
         }
+    }
+
+    @GetMapping("/thank")
+    public ResponseEntity<?> handleVNPayReturn(
+            @RequestParam("vnp_ResponseCode") Optional<String> vnpayResponseCode,
+            @RequestParam("vnp_TxnRef") Optional<String> paymentRef) {
+
+        if (vnpayResponseCode.isPresent() && paymentRef.isPresent()) {
+            String status = vnpayResponseCode.get().equals("00") ? "PAYMENT_SUCCEED" : "PAYMENT_FAILED";
+            Order order = cartService.updatePaymentStatus(paymentRef.get(), status);
+
+            if (order != null && "PAYMENT_SUCCEED".equals(status)) {
+                this.emailService.sendBookingInvoice(order);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "status", status,
+                    "message", "Đã cập nhật trạng thái đơn hàng"));
+        }
+
+        return ResponseEntity.badRequest().body(Map.of(
+                "status", "INVALID",
+                "message", "Thiếu tham số hoặc không hợp lệ"));
     }
 
     @PutMapping("/cart")

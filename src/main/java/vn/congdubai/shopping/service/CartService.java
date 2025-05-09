@@ -143,7 +143,7 @@ public class CartService {
                 order.setStatus("Đang xử lý");
                 order.setPaymentMethod(paymentMethod);
                 order.setPaymentStatus("PAYMENT_UNPAID");
-
+                order.setOrderEmail(user.getEmail());
                 order.setPaymentRef(paymentMethod.equals("COD") ? "UNKNOWN" : uuid);
 
                 if (finalPrice != null) {
@@ -187,6 +187,17 @@ public class CartService {
             }
         }
         return currentOrder;
+    }
+
+    public Order updatePaymentStatus(String paymentRef, String paymentStatus) {
+        Optional<Order> orderOptional = this.orderRepository.findByPaymentRef(paymentRef);
+        if (orderOptional.isPresent()) {
+            Order order = orderOptional.get();
+            order.setPaymentStatus(paymentStatus);
+            this.orderRepository.save(order);
+            return order;
+        }
+        return null;
     }
 
     public void handleUpdateQuantity(long cartDetailId, long quantity) {

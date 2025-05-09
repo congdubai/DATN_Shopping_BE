@@ -5,11 +5,12 @@ import jakarta.mail.internet.MimeMessage;
 import vn.congdubai.shopping.domain.Order;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 
 @Service
 public class EmailService {
@@ -23,14 +24,20 @@ public class EmailService {
     public void sendVerificationEmail(String to, String subject, String body) {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message, true); // true indicates multipart message
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("doanhvipnvn@gmail.com", "Hotel Luxeoasis");
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(body, true); // true indicates HTML content
+            helper.setText(body, true);
+
             javaMailSender.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
-            // Handle exception
+            // Ghi log lỗi (nếu bạn có logger)
+            System.err.println("Không thể gửi email đến " + to + ": " + e.getMessage());
+            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Lỗi mã hóa tiêu đề người gửi: " + e.getMessage());
+            throw new RuntimeException("Lỗi khi xử lý người gửi.");
         }
     }
 
@@ -59,25 +66,8 @@ public class EmailService {
                 .append("</head>")
                 .append("<body>")
                 .append("<div class=\"container\">");
-
-        // if (activeCoupons.isEmpty()) {
-        // body.append("<p>Hiện tại Hotel chúng tôi đang không còn ưu đãi.</p>");
-        // } else {
-        body.append("<h1>Hiện tại Hotel chúng tôi đang có các ưu đãi vô cùng hấp dẫn!</h1>")
-                .append("<p>Xin chào,</p>")
-                .append("<p>Dưới đây là danh sách các mã giảm giá của Hotel chúng tôi:</p>")
-                .append("<ul>");
-        // for (CouponDTO coupon : activeCoupons) {
-        // body.append("<li>")
-        // .append("<strong>Mã:</strong> ").append(coupon.getCode())
-        // .append(", <strong>Giảm giá:</strong>
-        // ").append(coupon.getDiscountPercentage()).append("%")
-        // .append(", <strong>Hạn sử dụng:</strong> ").append(coupon.getExpiryDate())
-        // .append("</li>");
-        // }
         body.append("</ul>")
                 .append("<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>");
-        // }
 
         body.append("</div>")
                 .append("</body>")
@@ -87,6 +77,7 @@ public class EmailService {
         sendVerificationEmail(to, subject, body.toString());
     }
 
+    @Async
     public void sendBookingInvoice(Order order) {
         String subject = "Hóa đơn đặt phòng #" + order.getId();
         String body = generateInvoiceHtml(order);
@@ -166,7 +157,7 @@ public class EmailService {
                 "</div>" +
                 "<div class=\"order\">" +
                 "<h3>Thông tin Đơn hàng</h3>" +
-                "<p><strong>Mã đươn hàng:</strong> {{id}}</p>" +
+                "<p><strong>Mã đơn hàng:</strong> {{id}}</p>" +
                 "<p><strong>Tên người dùng:</strong> {{receiverName}}</p>" +
                 "<p><strong>Số điện thoại:</strong> {{receiverPhone}}</p>" +
                 "<h3>Chi tiết thanh toán</h3>" +
@@ -181,6 +172,7 @@ public class EmailService {
                 "</div>" +
                 "</body>" +
                 "</html>";
+
         // Thay thế các biến trong HTML bằng dữ liệu thực tế
         return htmlTemplate
                 .replace("{{id}}", String.valueOf(order.getId()))
