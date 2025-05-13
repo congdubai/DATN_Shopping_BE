@@ -1,7 +1,6 @@
 package vn.congdubai.shopping.service;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import vn.congdubai.shopping.domain.Messages;
@@ -9,59 +8,46 @@ import vn.congdubai.shopping.domain.response.MessageDTO;
 import vn.congdubai.shopping.repository.MessageRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public interface MessageService {
-    List<MessageDTO> getMessagesByReceiver(String receiver);
-
-    void saveMessage(Messages message);
-
-    void markAsRead(int id);
-
-    long getUnreadMessageCount(String receiver);
-
-    public List<MessageDTO> getAllMessages();
-
-}
-
 @Service
-class MessageServiceIpml implements MessageService {
+public class MessageService {
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
+
+    public MessageService(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
     private final ModelMapper modelMapper = new ModelMapper();
 
-    @Override
     public List<MessageDTO> getMessagesByReceiver(String receiver) {
-        List<Messages> messages = messageRepository.findByReceiverOrderByTimestampDesc(receiver);
+        List<Messages> messages = this.messageRepository.findByReceiverOrderByTimestampDesc(receiver);
         return messages.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    @Override
     public void saveMessage(Messages message) {
         messageRepository.save(message);
     }
 
-    @Override
     public void markAsRead(int id) {
-        Messages message = messageRepository.findById(id).orElse(null);
-        if (message != null) {
-            message.setRead(true);
-            messageRepository.save(message);
+        Optional<Messages> message = this.messageRepository.findById(id);
+        if (message.isPresent()) {
+            Messages mes = message.get();
+            mes.setRead(true);
+            messageRepository.save(mes);
         }
     }
 
-    @Override
     public long getUnreadMessageCount(String receiver) {
-        return messageRepository.countByReceiverAndIsRead(receiver, false);
+        return this.messageRepository.countByReceiverAndIsRead(receiver, false);
     }
 
-    @Override
     public List<MessageDTO> getAllMessages() {
-        return messageRepository.findAll().stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        return this.messageRepository.findAll().stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
     }
 
     private MessageDTO convertToDTO(Messages message) {

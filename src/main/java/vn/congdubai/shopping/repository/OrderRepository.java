@@ -18,8 +18,9 @@ import vn.congdubai.shopping.domain.response.ResProductSalesDTO;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE DATE(order_date) = CURRENT_DATE", nativeQuery = true)
-    double getTotalPriceByDay();
+    @Query(value = "SELECT COALESCE(SUM(total_price), 0) FROM shopping_data.tblorder WHERE order_date BETWEEN :startDate AND :endDate", nativeQuery = true)
+    double getTotalPriceByDay(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
     Page<Order> findByUser(User user, Pageable pageable);
 
@@ -78,5 +79,12 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("toDate") LocalDateTime toDate);
 
     Optional<Order> findByPaymentRef(String paymentRef);
+
+    @Query(value = "SELECT COALESCE(SUM(quantity), 0) FROM shopping_data.tblorder " +
+            "INNER JOIN shopping_data.tblorder_detail ON shopping_data.tblorder.id = shopping_data.tblorder_detail.order_id "
+            +
+            "WHERE order_date BETWEEN :startDate AND :endDate AND status = 'Đã hủy'", nativeQuery = true)
+    long countQuantityCancelOrderByDay(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
 }

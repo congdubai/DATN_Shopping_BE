@@ -1,5 +1,7 @@
 package vn.congdubai.shopping.repository;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,6 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     User findByRefreshTokenAndEmail(String token, String email);
 
-    @Query(value = "SELECT COUNT(*) FROM tbluser WHERE DATE(created_at) = CURRENT_DATE", nativeQuery = true)
-    long countUsersByDay();
+    @Query(value = "SELECT COUNT(*) FROM tbluser WHERE created_at BETWEEN :startDate AND :endDate", nativeQuery = true)
+    long countUsersByDay(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
 }

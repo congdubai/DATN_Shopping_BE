@@ -25,7 +25,7 @@ public class EmailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("doanhvipnvn@gmail.com", "Hotel Luxeoasis");
+            helper.setFrom("congdubai27@gmail.com", "CTStore");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(body, true);
@@ -42,7 +42,7 @@ public class EmailService {
     }
 
     public void sendCouponExp(String to) {
-        String subject = "Hotel Luxeoasis";
+        String subject = "CTStore";
         Date today = new Date();
         // List<CouponDTO> activeCoupons = couponService.findCouponsByExpiryDate(today);
 
@@ -79,7 +79,7 @@ public class EmailService {
 
     @Async
     public void sendBookingInvoice(Order order) {
-        String subject = "Hóa đơn đặt phòng #" + order.getId();
+        String subject = "Hóa đơn đặt hàng #" + order.getId();
         String body = generateInvoiceHtml(order);
 
         sendVerificationEmail(order.getOrderEmail(), subject, body);

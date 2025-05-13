@@ -1,16 +1,19 @@
 package vn.congdubai.shopping.controller.admin;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.turkraft.springfilter.boot.Filter;
 
 import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Order;
+import vn.congdubai.shopping.domain.response.ResCategorySalesDTO;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.service.DashBoardService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -29,20 +32,30 @@ public class DashBoardController {
 
     @GetMapping("/dashboard/count-user-by-day")
     @ApiMessage("Fetch quantity user")
-    public ResponseEntity<Long> getCountUserByDay() {
-        return ResponseEntity.ok(this.dashBoardService.handleCountUserByDay());
+    public ResponseEntity<Long> getCountUserByDay(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleCountUserByDay(startDate, endDate));
     }
 
     @GetMapping("/dashboard/count-order-by-day")
     @ApiMessage("Fetch quantity order")
-    public ResponseEntity<Long> getCountQuantityOrderByDay() {
-        return ResponseEntity.ok(this.dashBoardService.handleCountOrderByDay());
+    public ResponseEntity<Long> getCountQuantityOrderByDay(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleCountOrderByDay(startDate, endDate));
+    }
+
+    @GetMapping("/dashboard/count-cancel-order-by-day")
+    @ApiMessage("Fetch quantity order")
+    public ResponseEntity<Long> getCountQuantityCancelOrderByDay(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleCountCancelOrderByDay(startDate, endDate));
     }
 
     @GetMapping("/dashboard/total-price-by-day")
     @ApiMessage("Fetch total price")
-    public ResponseEntity<Double> getTotalPriceByDay() {
-        return ResponseEntity.ok(this.dashBoardService.handleGetTotalPriceByDay());
+    public ResponseEntity<Double> getTotalPriceByDay(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleGetTotalPriceByDay(startDate, endDate));
     }
 
     @GetMapping("/dashboard/currentOrder")
@@ -51,4 +64,10 @@ public class DashBoardController {
         return ResponseEntity.ok(this.dashBoardService.handleFetchCurrrentOrderByDay());
     }
 
+    @GetMapping("/dashboard/category-sale")
+    @ApiMessage("Fetch category sale")
+    public ResponseEntity<List<ResCategorySalesDTO>> getCategorySales(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleFetchCategorySales(startDate, endDate));
+    }
 }

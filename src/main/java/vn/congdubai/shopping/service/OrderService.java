@@ -89,7 +89,7 @@ public class OrderService {
         mt.setPages(ordersPage.getTotalPages());
         mt.setTotal(ordersPage.getTotalElements());
         rs.setMeta(mt);
-        rs.setResult(ordersPage.get());
+        rs.setResult(ordersPage.getContent());
 
         return rs;
     }
