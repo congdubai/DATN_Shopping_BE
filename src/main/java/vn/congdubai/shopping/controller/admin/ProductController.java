@@ -11,15 +11,19 @@ import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
-import vn.congdubai.shopping.domain.User;
+import vn.congdubai.shopping.domain.response.ProductDTO;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.CategoryRepository;
+import vn.congdubai.shopping.repository.ProductRepository;
 import vn.congdubai.shopping.service.ProductService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 import vn.congdubai.shopping.util.constant.GenderEnum;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
-import org.springframework.data.domain.PageRequest;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -35,13 +39,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/v1")
 public class ProductController {
 
+    private final ProductRepository productRepository;
     private final ProductService productService;
     private final CategoryRepository categoryRepository;
 
     public ProductController(ProductService productService, CategoryRepository categoryRepository,
-            AuthController authController) {
+            AuthController authController, ProductRepository productRepository) {
         this.productService = productService;
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     @GetMapping("/products")
@@ -113,6 +119,71 @@ public class ProductController {
 
         // Trả về kết quả phân trang
         return ResponseEntity.ok(productService.handleFetchProductsByGender(genderEnum, pageable));
+    }
+
+    @GetMapping("/products/search")
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String name) {
+        List<Product> products = productService.searchProductsByName(name);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/products/search-query")
+    public ResponseEntity<List<ProductDTO>> searchProductByQuery(
+            @RequestParam(name = "query", required = false) String query) {
+        // Giá mặc định nếu không truyền range
+        Long category = null;
+        Double minPrice = 0.0;
+        Double maxPrice = Double.MAX_VALUE;
+        Long rating = null;
+        Long colors = null;
+
+        if (query != null) {
+            try {
+                // Giải mã chuỗi query
+                String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8.name());
+
+                // Tách chuỗi query thành các tham số
+                String[] params = decodedQuery.split("&");
+                for (String param : params) {
+                    String[] keyValue = param.split("=");
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0];
+                        String value = keyValue[1];
+
+                        // Gán các tham số vào các biến tương ứng
+                        if ("category".equals(key)) {
+                            category = Long.valueOf(value);
+                        } else if ("priceRange".equals(key)) {
+                            String[] priceArray = value.split("-");
+                            if (priceArray.length == 2) {
+                                try {
+                                    minPrice = Double.valueOf(priceArray[0].trim());
+                                    maxPrice = Double.valueOf(priceArray[1].trim());
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Lỗi chuyển đổi khoảng giá: " + e.getMessage());
+                                }
+                            }
+                        } else if ("colors".equals(key)) {
+                            colors = Long.valueOf(value);
+                        } else if ("rating".equals(key)) {
+                            rating = Long.valueOf(value);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Xử lý lỗi nếu có
+                System.out.println("Lỗi khi phân tích query string: " + e.getMessage());
+            }
+        }
+
+        // Log giá trị các tham số
+        System.out.println("check value: category: " + category + " min " + minPrice + " max " + maxPrice +
+                " color " + colors + " sao " + rating);
+
+        // Tìm kiếm sản phẩm với các điều kiện đã được lọc
+        List<ProductDTO> result = productRepository.searchProducts(category, minPrice, maxPrice, colors, rating);
+
+        return ResponseEntity.ok(result);
     }
 
 }

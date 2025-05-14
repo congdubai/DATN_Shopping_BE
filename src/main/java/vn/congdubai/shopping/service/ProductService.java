@@ -1,5 +1,6 @@
 package vn.congdubai.shopping.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Product;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.ProductRepository;
+import vn.congdubai.shopping.repository.ReviewRepository;
 import vn.congdubai.shopping.util.constant.GenderEnum;
 import vn.congdubai.shopping.util.error.IdInvalidException;
 
@@ -19,11 +21,13 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final ReviewRepository reviewRepository;
 
     public ProductService(ProductRepository productRepository, FileService fileService,
-            CategoryService categoryService) {
+            CategoryService categoryService, ReviewRepository reviewRepository) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.reviewRepository = reviewRepository;
     }
 
     public Specification<Product> notDeletedSpec() {
@@ -132,6 +136,10 @@ public class ProductService {
         rs.setMeta(mt);
         rs.setResult(pProducts.getContent());
         return rs;
+    }
+
+    public List<Product> searchProductsByName(String query) {
+        return productRepository.findByNameContainingIgnoreCase(query);
     }
 
 }
