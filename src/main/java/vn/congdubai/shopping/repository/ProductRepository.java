@@ -46,6 +46,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
                             WHERE (:categoryId IS NULL OR p.category.id = :categoryId)
                               AND (p.price BETWEEN :minPrice AND :maxPrice)
                               AND (:colorId IS NULL OR c.id = :colorId)
+                              AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
                             GROUP BY p.id, p.name, p.price, c.name, p.image
                         """)
         List<ProductDTO> searchProducts(
@@ -53,6 +54,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
                         @Param("minPrice") Double minPrice,
                         @Param("maxPrice") Double maxPrice,
                         @Param("colorId") Long colorId,
-                        @Param("rating") Long rating);
+                        @Param("rating") Long rating,
+                        @Param("name") String name);
 
 }

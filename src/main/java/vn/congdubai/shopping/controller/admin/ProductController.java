@@ -131,6 +131,7 @@ public class ProductController {
     public ResponseEntity<List<ProductDTO>> searchProductByQuery(
             @RequestParam(name = "query", required = false) String query) {
         // Giá mặc định nếu không truyền range
+        String name = "";
         Long category = null;
         Double minPrice = 0.0;
         Double maxPrice = Double.MAX_VALUE;
@@ -167,6 +168,8 @@ public class ProductController {
                             colors = Long.valueOf(value);
                         } else if ("rating".equals(key)) {
                             rating = Long.valueOf(value);
+                        } else if ("name".equals(key)) {
+                            name = value; // Lưu giá trị name từ query
                         }
                     }
                 }
@@ -175,13 +178,8 @@ public class ProductController {
                 System.out.println("Lỗi khi phân tích query string: " + e.getMessage());
             }
         }
-
-        // Log giá trị các tham số
-        System.out.println("check value: category: " + category + " min " + minPrice + " max " + maxPrice +
-                " color " + colors + " sao " + rating);
-
-        // Tìm kiếm sản phẩm với các điều kiện đã được lọc
-        List<ProductDTO> result = productRepository.searchProducts(category, minPrice, maxPrice, colors, rating);
+        // Tìm kiếm sản phẩm với các điều kiện đã được lọc, bao gồm tên sản phẩm
+        List<ProductDTO> result = productRepository.searchProducts(category, minPrice, maxPrice, colors, rating, name);
 
         return ResponseEntity.ok(result);
     }
