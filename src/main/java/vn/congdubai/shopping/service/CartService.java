@@ -140,7 +140,11 @@ public class CartService {
                 order.setReceiverAddress(receiverAddress);
                 order.setReceiverPhone(receiverPhone);
                 order.setOrderDate(LocalDateTime.now());
-                order.setStatus("Đang xử lý");
+                if (paymentMethod.equals("COD_OFFLINE")) {
+                    order.setStatus("Đã hoàn thành");
+                } else {
+                    order.setStatus("Đang xử lý");
+                }
                 order.setPaymentMethod(paymentMethod);
                 order.setPaymentStatus("PAYMENT_UNPAID");
                 order.setOrderEmail(user.getEmail());

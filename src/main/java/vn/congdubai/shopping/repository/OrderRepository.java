@@ -2,6 +2,7 @@ package vn.congdubai.shopping.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -86,5 +87,24 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             "WHERE order_date BETWEEN :startDate AND :endDate AND status = 'Đã hủy'", nativeQuery = true)
     long countQuantityCancelOrderByDay(@Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    @Query(value = """
+            SELECT
+                DATE_FORMAT(o.order_date, '%b') AS date,
+                CASE
+                    WHEN o.payment_method = 'COD_OFFLINE' THEN 'Tại cửa hàng'
+                    ELSE 'Online'
+                END AS country,
+                SUM(o.total_price) AS value
+            FROM tblorder o
+            WHERE o.order_date BETWEEN :startDate AND :endDate
+            GROUP BY DATE_FORMAT(o.order_date, '%b'),
+                     CASE WHEN o.payment_method = 'COD_OFFLINE' THEN 'Tại cửa hàng' ELSE 'Online' END,
+                     MONTH(o.order_date)
+            ORDER BY MONTH(o.order_date)
+            """, nativeQuery = true)
+    List<Map<String, Object>> getMonthlyRevenueByChannel(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate);
 
 }

@@ -41,6 +41,7 @@ public class User {
     @NotBlank(message = "Password không được để trống")
     private String password;
     private String avatar;
+    private int phone;
     private int age;
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;

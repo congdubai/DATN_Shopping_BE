@@ -4,20 +4,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turkraft.springfilter.boot.Filter;
-
-import vn.congdubai.shopping.domain.Category;
 import vn.congdubai.shopping.domain.Order;
 import vn.congdubai.shopping.domain.response.ResCategorySalesDTO;
-import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
+import vn.congdubai.shopping.domain.response.ResSaleChannelSummaryDTO;
+import vn.congdubai.shopping.domain.response.TopUserStatisticDTO;
 import vn.congdubai.shopping.service.DashBoardService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -69,5 +66,21 @@ public class DashBoardController {
     public ResponseEntity<List<ResCategorySalesDTO>> getCategorySales(@RequestParam LocalDateTime startDate,
             @RequestParam LocalDateTime endDate) {
         return ResponseEntity.ok(this.dashBoardService.handleFetchCategorySales(startDate, endDate));
+    }
+
+    @GetMapping("/dashboard/top-seller")
+    @ApiMessage("Fetch top seller")
+    public ResponseEntity<List<TopUserStatisticDTO>> getTopSeller(@RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleFetchTopSellerByDay(startDate, endDate));
+    }
+
+    @GetMapping("/dashboard/revenue-by-channel")
+    public ResponseEntity<List<Map<String, Object>>> getRevenueByChannel(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        List<Map<String, Object>> result = this.dashBoardService.getRevenueByChannel(startDate, endDate);
+        return ResponseEntity.ok(result);
     }
 }
