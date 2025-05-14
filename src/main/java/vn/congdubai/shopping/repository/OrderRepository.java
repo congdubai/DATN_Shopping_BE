@@ -1,5 +1,6 @@
 package vn.congdubai.shopping.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -106,5 +107,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     List<Map<String, Object>> getMonthlyRevenueByChannel(
             @Param("startDate") String startDate,
             @Param("endDate") String endDate);
+
+    @Query("SELECT SUM(o.totalPrice) FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate")
+    Double getTotalRevenue(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
 }

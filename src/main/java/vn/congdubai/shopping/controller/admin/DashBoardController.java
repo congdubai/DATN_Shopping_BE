@@ -83,4 +83,11 @@ public class DashBoardController {
         List<Map<String, Object>> result = this.dashBoardService.getRevenueByChannel(startDate, endDate);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/dashboard/total-price")
+    public ResponseEntity<Double> getRevenueByChannel(
+            @RequestParam("startDate") LocalDateTime startDate,
+            @RequestParam("endDate") LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleFetchTotalPriceByDay(startDate, endDate));
+    }
 }

@@ -120,4 +120,9 @@ public class DashBoardService {
         return monthMap.getOrDefault(month, month);
     }
 
+    // lấy Tổng số tiền theo ngày
+    public Double handleFetchTotalPriceByDay(LocalDateTime startDate, LocalDateTime endDate) {
+        return this.orderRepository.getTotalRevenue(startDate, endDate);
+    }
+
 }
