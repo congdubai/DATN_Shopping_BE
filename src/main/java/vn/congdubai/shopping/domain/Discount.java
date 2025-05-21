@@ -41,10 +41,10 @@ public class Discount {
     @DecimalMin(value = "0", message = "Giảm giá tối đa phải lớn hơn hoặc bằng 0")
     private double maxDiscount;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime startDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime endDate;
 
     @Column(columnDefinition = "TEXT")
