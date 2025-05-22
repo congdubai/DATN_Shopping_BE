@@ -1,5 +1,6 @@
 package vn.congdubai.shopping.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -73,5 +74,14 @@ public class DiscountService {
         if (discountOptional.isPresent())
             return discountOptional.get();
         return null;
+    }
+
+    // Fetch top 3 discount desc
+    public List<Discount> handleFetchTop3Discount() {
+        return this.discountRepository.findTop3ByOrderByIdDesc();
+    }
+
+    public Discount handleFetchDiscountByCode(String code) {
+        return this.discountRepository.findByCode(code);
     }
 }
