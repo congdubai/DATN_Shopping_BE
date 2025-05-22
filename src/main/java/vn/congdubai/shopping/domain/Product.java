@@ -42,6 +42,10 @@ public class Product {
     @DecimalMin(value = "0", inclusive = false, message = "Giá sản phẩm phải lớn hơn 0")
     private double price;
 
+    @NotNull
+    @DecimalMin(value = "0", inclusive = false, message = "Giá sản phẩm phải lớn hơn 0")
+    private double minPrice;
+
     private String image;
 
     @Column(columnDefinition = "MEDIUMTEXT")

@@ -64,4 +64,5 @@ public class Order {
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
 }

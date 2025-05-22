@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import vn.congdubai.shopping.domain.Order;
+import vn.congdubai.shopping.domain.response.OrderProfitDTO;
 import vn.congdubai.shopping.domain.response.ResCategorySalesDTO;
 import vn.congdubai.shopping.domain.response.ResSaleChannelSummaryDTO;
 import vn.congdubai.shopping.domain.response.TopUserStatisticDTO;
@@ -125,4 +126,8 @@ public class DashBoardService {
         return this.orderRepository.getTotalRevenue(startDate, endDate);
     }
 
+    public List<OrderProfitDTO> handleFetchOrderProfit(LocalDateTime startDate, LocalDateTime endDate) {
+        return this.orderRepository.getOrderProfitsByDateAndStatus(startDate, endDate);
+
+    }
 }

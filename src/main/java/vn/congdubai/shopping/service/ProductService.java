@@ -100,6 +100,7 @@ public class ProductService {
         if (currentProduct != null) {
             currentProduct.setName(product.getName());
             currentProduct.setPrice(product.getPrice());
+            currentProduct.setMinPrice(product.getMinPrice());
             currentProduct.setImage(product.getImage());
             currentProduct.setShortDesc(product.getShortDesc());
             currentProduct.setDetailDesc(product.getDetailDesc());

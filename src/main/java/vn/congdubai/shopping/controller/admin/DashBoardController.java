@@ -3,14 +3,21 @@ package vn.congdubai.shopping.controller.admin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.io.File;
+import org.springframework.http.HttpHeaders;
 
+import jakarta.servlet.http.HttpServletResponse;
 import vn.congdubai.shopping.domain.Order;
+import vn.congdubai.shopping.domain.response.OrderProfitDTO;
 import vn.congdubai.shopping.domain.response.ResCategorySalesDTO;
-import vn.congdubai.shopping.domain.response.ResSaleChannelSummaryDTO;
 import vn.congdubai.shopping.domain.response.TopUserStatisticDTO;
 import vn.congdubai.shopping.service.DashBoardService;
+import vn.congdubai.shopping.service.Jobscheduler;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +28,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 @RequestMapping("/api/v1")
 public class DashBoardController {
+
+    private final Jobscheduler jobscheduler;
     private final DashBoardService dashBoardService;
 
-    public DashBoardController(DashBoardService dashBoardService) {
+    public DashBoardController(DashBoardService dashBoardService, Jobscheduler jobscheduler) {
         this.dashBoardService = dashBoardService;
+        this.jobscheduler = jobscheduler;
     }
 
     @GetMapping("/dashboard/count-user-by-day")
@@ -89,5 +99,47 @@ public class DashBoardController {
             @RequestParam("startDate") LocalDateTime startDate,
             @RequestParam("endDate") LocalDateTime endDate) {
         return ResponseEntity.ok(this.dashBoardService.handleFetchTotalPriceByDay(startDate, endDate));
+    }
+
+    @GetMapping("/dashboard/order-profit")
+    @ApiMessage("Fetch Order ProfitDTO")
+    public ResponseEntity<List<OrderProfitDTO>> getOrderProfitDTO(@RequestParam("startDate") LocalDateTime startDate,
+            @RequestParam("endDate") LocalDateTime endDate) {
+        return ResponseEntity.ok(this.dashBoardService.handleFetchOrderProfit(startDate, endDate));
+    }
+
+    @GetMapping("/dashboard/export-excel")
+    public void exportExcel(
+            @RequestParam("startDate") LocalDateTime startDate,
+            @RequestParam("endDate") LocalDateTime endDate,
+            HttpServletResponse response) {
+        try {
+            // Gọi phương thức xuất Excel
+            jobscheduler.exportExcel(this.dashBoardService.handleFetchOrderProfit(startDate, endDate));
+
+            // Đọc file Excel đã tạo
+            File file = new File("temp.xlsx");
+            try (FileInputStream fileInputStream = new FileInputStream(file);
+                    OutputStream outputStream = response.getOutputStream()) {
+
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders_profit_report.xlsx");
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                file.delete(); // đảm bảo xóa file dù có lỗi hay không
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
