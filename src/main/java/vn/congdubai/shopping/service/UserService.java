@@ -7,11 +7,14 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
 import vn.congdubai.shopping.domain.Role;
 import vn.congdubai.shopping.domain.User;
+import vn.congdubai.shopping.domain.response.PasswordDTO;
 import vn.congdubai.shopping.domain.response.ResCreateUserDTO;
 import vn.congdubai.shopping.domain.response.ResUpdateUserDTO;
 import vn.congdubai.shopping.domain.response.ResUserDTO;
@@ -22,10 +25,12 @@ import vn.congdubai.shopping.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleService roleService) {
+    public UserService(UserRepository userRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Specification<User> notDeletedSpec() {
@@ -165,5 +170,22 @@ public class UserService {
 
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    }
+
+    public void changePassword(PasswordDTO request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            throw new RuntimeException("Không tìm thấy người dùng!");
+        }
+
+        // So sánh mật khẩu cũ
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu cũ không đúng");
+        }
+
+        // Mã hóa và cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

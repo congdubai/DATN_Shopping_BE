@@ -1,18 +1,24 @@
 package vn.congdubai.shopping.controller.admin;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 import vn.congdubai.shopping.domain.User;
+import vn.congdubai.shopping.domain.response.OrderProfitDTO;
+import vn.congdubai.shopping.domain.response.PasswordDTO;
 import vn.congdubai.shopping.domain.response.ResCreateUserDTO;
 import vn.congdubai.shopping.domain.response.ResUpdateUserDTO;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.service.UserService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 import vn.congdubai.shopping.util.error.IdInvalidException;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -79,5 +85,18 @@ public class UserController {
             throw new IdInvalidException("User với id = " + putUser.getId() + " không tồn tại");
         }
         return ResponseEntity.ok(this.userService.convertToResUpdateUserDTO(user));
+    }
+
+    @GetMapping("/users/by-email")
+    @ApiMessage("Fetch users by email")
+    public ResponseEntity<User> getOrderProfitDTO(@RequestParam("email") String email) {
+        return ResponseEntity.ok(this.userService.handleGetUserByUsername(email));
+    }
+
+    @PutMapping("/users/change-password")
+    @ApiMessage("Update password")
+    public ResponseEntity<Void> changePassword(@RequestBody PasswordDTO request) {
+        this.userService.changePassword(request);
+        return ResponseEntity.ok(null);
     }
 }
