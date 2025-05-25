@@ -80,7 +80,7 @@ public class DiscountController {
         return ResponseEntity.ok(discount);
     }
 
-    @GetMapping("/discounts-top3")
+    @GetMapping("/discounts/discounts-top3")
     @ApiMessage("Fetch discounts top 3")
     public ResponseEntity<List<Discount>> getDiscountsTop3() {
         return ResponseEntity.ok(this.discountService.handleFetchTop3Discount());

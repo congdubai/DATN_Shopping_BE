@@ -60,6 +60,10 @@ public class RoleService {
         return this.roleRepository.save(role);
     }
 
+    public Role handleFetchRoleByName(String name) {
+        return this.roleRepository.findByName(name);
+    }
+
     // Update role
     public Role handleUpdateRole(Role role) {
         Role currentRole = this.handleFetchRoleById(role.getId());
