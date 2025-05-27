@@ -34,7 +34,7 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setRating(true);
-        review.setOrder(order); // đảm bảo là bản ghi đã được merge
+        review.setOrder(order);
         orderRepository.save(order);
 
         return reviewRepository.save(review);
@@ -59,8 +59,9 @@ public class ReviewService {
                     resReviewDTO.setId(review.getId());
                     resReviewDTO.setRating(review.getRating());
                     resReviewDTO.setComment(review.getComment());
-                    resReviewDTO.setUserName(review.getUser().getName()); // Lấy tên người dùng
-                    resReviewDTO.setAvatar(review.getUser().getAvatar()); // Lấy avatar người dùng
+                    resReviewDTO.setUserName(review.getUser().getName());
+                    resReviewDTO.setAvatar(review.getUser().getAvatar());
+                    resReviewDTO.setCreatedAt(review.getCreatedAt());
                     return resReviewDTO;
                 })
                 .collect(Collectors.toList());

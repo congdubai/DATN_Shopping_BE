@@ -184,4 +184,11 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/products/by-id/{id}")
+    @ApiMessage("Fetch products by id")
+    public ResponseEntity<Product> fetchProductsByGender(
+            @PathVariable long id) {
+        return ResponseEntity.ok(productService.handleFetchProductById(id));
+    }
+
 }

@@ -44,7 +44,7 @@ public class CartService {
         this.orderDetailRepository = orderDetailRepository;
     }
 
-    public void addProductToCart(long productId, HttpSession session, long quantity, long colorId, long sizeId) {
+    public void addProductToCart(long productId, long quantity, long colorId, long sizeId) {
         Optional<String> optionalUsername = SecurityUtil.getCurrentUserLogin();
 
         if (!optionalUsername.isPresent()) {
@@ -90,7 +90,6 @@ public class CartService {
 
             cart.setQuantity(cart.getQuantity() + 1);
             cartRepository.save(cart);
-            session.setAttribute("sum", cart.getQuantity());
         } else {
             existingDetail.setQuantity(existingDetail.getQuantity() + quantity);
             cartDetailRepository.save(existingDetail);

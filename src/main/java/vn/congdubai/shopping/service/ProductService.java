@@ -1,7 +1,10 @@
 package vn.congdubai.shopping.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,28 @@ public class ProductService {
 
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+        List<Product> productList = pProducts.getContent();
+
+        List<Long> productIds = productList.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        List<Object[]> ratingData = reviewRepository.findAverageRatingsForProducts(productIds);
+        Map<Long, Double> avgRatingMap = new HashMap<>();
+        for (Object[] row : ratingData) {
+            Number productIdNum = (Number) row[0];
+            Long productId = productIdNum.longValue();
+
+            Number avgRatingNum = (Number) row[1];
+            Double avgRating = avgRatingNum != null ? avgRatingNum.doubleValue() : 0.0;
+
+            avgRatingMap.put(productId, avgRating);
+        }
+
+        for (Product product : productList) {
+            Double avgRating = avgRatingMap.getOrDefault(Long.valueOf(product.getId()), 0.0);
+            product.setAvgRating(avgRating);
+        }
 
         mt.setPage(pageable.getPageNumber() + 1);
         mt.setPageSize(pageable.getPageSize());

@@ -17,4 +17,8 @@ import vn.congdubai.shopping.domain.Review;
 public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecificationExecutor<Product> {
     Page<Review> findByProduct(Product product, Pageable pageable);
 
+    @Query("SELECT r.product.id AS productId, AVG(r.rating) AS avgRating " +
+            "FROM Review r WHERE r.product.id IN :productIds GROUP BY r.product.id")
+    List<Object[]> findAverageRatingsForProducts(@Param("productIds") List<Long> productIds);
+
 }

@@ -1,5 +1,7 @@
 package vn.congdubai.shopping.domain.response;
 
+import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +13,5 @@ public class ResReviewDTO {
     private String comment;
     private String userName;
     private String avatar;
+    private LocalDateTime createdAt;
 }

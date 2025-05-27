@@ -63,7 +63,7 @@ public class CartController {
             @RequestParam long color,
             @RequestParam long size,
             HttpSession session) {
-        cartService.addProductToCart(productId, session, quantity, color, size);
+        cartService.addProductToCart(productId, quantity, color, size);
 
         ResResponse<Void> response = new ResResponse<>();
         response.setStatusCode(200);
