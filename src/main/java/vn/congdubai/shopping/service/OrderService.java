@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Order;
 import vn.congdubai.shopping.domain.OrderDetail;
 import vn.congdubai.shopping.domain.Review;
@@ -80,8 +82,8 @@ public class OrderService {
     }
 
     // Fetch list order
-    public ResultPaginationDTO handleFetchOrders(Pageable pageable) {
-        Page<Order> ordersPage = orderRepository.findAll(pageable);
+    public ResultPaginationDTO handleFetchOrders(Specification<Order> spec, Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.findAll(spec, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
         mt.setPage(pageable.getPageNumber() + 1);
@@ -138,6 +140,12 @@ public class OrderService {
         LocalDateTime minCreatedDate = toDate.minusDays(10);
 
         return orderRepository.findLowSalesProducts(minCreatedDate, fromDate, toDate);
+    }
+
+    // Fetch Order by id
+    public Order handleFetchOrderById(long id) {
+        Optional<Order> opOrder = this.orderRepository.findById(id);
+        return opOrder.get();
     }
 
 }

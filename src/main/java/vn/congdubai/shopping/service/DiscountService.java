@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Discount;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.DiscountRepository;
@@ -21,8 +22,9 @@ public class DiscountService {
     }
 
     // Fetch all discount
-    public ResultPaginationDTO handleFetchDiscounts(Pageable pageable) {
-        Page<Discount> pDiscount = this.discountRepository.findAll(pageable);
+    public ResultPaginationDTO handleFetchDiscounts(Specification<Discount> spec, Pageable pageable) {
+        
+        Page<Discount> pDiscount = this.discountRepository.findAll(spec, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 

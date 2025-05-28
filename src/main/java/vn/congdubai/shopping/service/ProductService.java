@@ -85,6 +85,29 @@ public class ProductService {
 
         Page<Product> pProducts = this.productRepository.findAll(finalSpec, pageable);
 
+        List<Product> productList = pProducts.getContent();
+
+        List<Long> productIds = productList.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        List<Object[]> ratingData = reviewRepository.findAverageRatingsForProducts(productIds);
+        Map<Long, Double> avgRatingMap = new HashMap<>();
+        for (Object[] row : ratingData) {
+            Number productIdNum = (Number) row[0];
+            Long productId = productIdNum.longValue();
+
+            Number avgRatingNum = (Number) row[1];
+            Double avgRating = avgRatingNum != null ? avgRatingNum.doubleValue() : 0.0;
+
+            avgRatingMap.put(productId, avgRating);
+        }
+
+        for (Product product : productList) {
+            Double avgRating = avgRatingMap.getOrDefault(Long.valueOf(product.getId()), 0.0);
+            product.setAvgRating(avgRating);
+        }
+
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
@@ -151,6 +174,28 @@ public class ProductService {
 
         Page<Product> pProducts = this.productRepository.findAll(spec, pageable);
 
+        List<Product> productList = pProducts.getContent();
+
+        List<Long> productIds = productList.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        List<Object[]> ratingData = reviewRepository.findAverageRatingsForProducts(productIds);
+        Map<Long, Double> avgRatingMap = new HashMap<>();
+        for (Object[] row : ratingData) {
+            Number productIdNum = (Number) row[0];
+            Long productId = productIdNum.longValue();
+
+            Number avgRatingNum = (Number) row[1];
+            Double avgRating = avgRatingNum != null ? avgRatingNum.doubleValue() : 0.0;
+
+            avgRatingMap.put(productId, avgRating);
+        }
+
+        for (Product product : productList) {
+            Double avgRating = avgRatingMap.getOrDefault(Long.valueOf(product.getId()), 0.0);
+            product.setAvgRating(avgRating);
+        }
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
@@ -165,7 +210,30 @@ public class ProductService {
     }
 
     public List<Product> searchProductsByName(String query) {
-        return productRepository.findByNameContainingIgnoreCase(query);
+
+        List<Product> productList = this.productRepository.findByNameContainingIgnoreCase(query);
+
+        List<Long> productIds = productList.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        List<Object[]> ratingData = reviewRepository.findAverageRatingsForProducts(productIds);
+        Map<Long, Double> avgRatingMap = new HashMap<>();
+        for (Object[] row : ratingData) {
+            Number productIdNum = (Number) row[0];
+            Long productId = productIdNum.longValue();
+
+            Number avgRatingNum = (Number) row[1];
+            Double avgRating = avgRatingNum != null ? avgRatingNum.doubleValue() : 0.0;
+
+            avgRatingMap.put(productId, avgRating);
+        }
+
+        for (Product product : productList) {
+            Double avgRating = avgRatingMap.getOrDefault(Long.valueOf(product.getId()), 0.0);
+            product.setAvgRating(avgRating);
+        }
+        return productList;
     }
 
 }

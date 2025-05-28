@@ -21,12 +21,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import vn.congdubai.shopping.domain.CartDetail;
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Discount;
 import vn.congdubai.shopping.domain.response.ResultPaginationDTO;
 import vn.congdubai.shopping.repository.DiscountRepository;
 import vn.congdubai.shopping.service.DiscountService;
 import vn.congdubai.shopping.util.annotation.ApiMessage;
 import vn.congdubai.shopping.util.error.IdInvalidException;
+import com.turkraft.springfilter.boot.Filter;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,8 +44,8 @@ public class DiscountController {
 
     @GetMapping("/discounts")
     @ApiMessage("Fetch discounts")
-    public ResponseEntity<ResultPaginationDTO> getDiscounts(Pageable pageable) {
-        return ResponseEntity.ok(this.discountService.handleFetchDiscounts(pageable));
+    public ResponseEntity<ResultPaginationDTO> getDiscounts(@Filter Specification<Discount> spec, Pageable pageable) {
+        return ResponseEntity.ok(this.discountService.handleFetchDiscounts(spec, pageable));
     }
 
     @PostMapping("/discounts")

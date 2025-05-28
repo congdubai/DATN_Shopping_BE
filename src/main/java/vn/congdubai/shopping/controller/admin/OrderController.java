@@ -2,7 +2,10 @@ package vn.congdubai.shopping.controller.admin;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.turkraft.springfilter.boot.Filter;
+
 import jakarta.validation.Valid;
+import vn.congdubai.shopping.domain.Color;
 import vn.congdubai.shopping.domain.Order;
 import vn.congdubai.shopping.domain.OrderDetail;
 import vn.congdubai.shopping.domain.User;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -82,10 +86,10 @@ public class OrderController {
 
     // Fetch list order
     @GetMapping("/orders")
-    @ApiMessage("Fetch all products")
+    @ApiMessage("Fetch all order")
     public ResponseEntity<ResultPaginationDTO> fetchOrders(
-            Pageable pageable) {
-        return ResponseEntity.ok(this.orderService.handleFetchOrders(pageable));
+            @Filter Specification<Order> spec, Pageable pageable) {
+        return ResponseEntity.ok(this.orderService.handleFetchOrders(spec, pageable));
     }
 
     // Fetch order by id
@@ -105,5 +109,11 @@ public class OrderController {
             throw new IdInvalidException("Đơn hàng với id = " + putOrder.getId() + " không tồn tại");
         }
         return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/orders/by-id/{id}")
+    @ApiMessage("Fetch order by id")
+    public ResponseEntity<Order> fetchOrderById(@PathVariable("id") long id) {
+        return ResponseEntity.ok(this.orderService.handleFetchOrderById(id));
     }
 }
