@@ -67,6 +67,7 @@ public class UserService {
         res.setEmail(user.getEmail());
         res.setName(user.getName());
         res.setAge(user.getAge());
+        res.setPhone(user.getPhone());
         res.setUpdatedAt(user.getUpdatedAt());
         res.setCreatedAt(user.getCreatedAt());
         res.setGender(user.getGender());
@@ -94,7 +95,6 @@ public class UserService {
     // Convert to ResCreateUserDTO
     public ResCreateUserDTO convertToResCreateUserDTO(User user) {
         ResCreateUserDTO res = new ResCreateUserDTO();
-
         res.setId(user.getId());
         res.setName(user.getName());
         res.setAvatar(user.getAvatar());
@@ -102,6 +102,7 @@ public class UserService {
         res.setAge(user.getAge());
         res.setCreatedAt(user.getCreatedAt());
         res.setGender(user.getGender());
+        res.setPhone(user.getPhone());
         res.setAddress(user.getAddress());
 
         return res;
@@ -133,6 +134,7 @@ public class UserService {
             userCurrent.setAddress(user.getAddress());
             userCurrent.setGender(user.getGender());
             userCurrent.setAvatar(user.getAvatar());
+            userCurrent.setPhone(user.getPhone());
             userCurrent.setAge(user.getAge());
             userCurrent.setName(user.getName());
             if (user.getRole() != null) {
